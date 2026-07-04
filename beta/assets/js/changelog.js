@@ -1,5 +1,33 @@
 const CHANGELOG = [
   {
+    version: "1.0.0.8",
+    date: "2026-07-04",
+    title: "Fast Picks",
+    summary: "Player selection is tuned for faster one-handed court use.",
+    highlights: [
+      "Cleared search after selecting or removing a player.",
+      "Floated the search/add bar and Go button near the keyboard.",
+      "Added swipe-left rename access on player rows.",
+      "Moved feedback messages away from the bottom controls."
+    ],
+    updateSections: [
+      {
+        heading: "Players",
+        items: [
+          "Selecting a player now clears the search field so the full list returns.",
+          "The search/add field and Go button float at the bottom of the Players screen."
+        ]
+      },
+      {
+        heading: "Editing",
+        items: [
+          "Swipe a player row from right to left to reveal the rename action.",
+          "Player edits continue to use stable player ids under the hood."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0.0.7",
     date: "2026-07-04",
     title: "Thumb Reach",
