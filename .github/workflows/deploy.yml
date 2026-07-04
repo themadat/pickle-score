@@ -4,8 +4,9 @@ name: Deploy to GitHub Pages
 # Beta:        beta   -> https://themadat.github.io/pickle-score/beta/
 # Alpha:       alpha  -> https://themadat.github.io/pickle-score/alpha/
 #
-# Each branch publishes into its own subfolder of the gh-pages branch.
-# keep_files: true prevents one branch's deploy from wiping another folder.
+# GitHub Pages must be configured with Source = GitHub Actions.
+# Each deploy assembles the full Pages artifact and replaces only the current
+# channel so beta/alpha/main deploys do not wipe each other.
 
 on:
   push:
@@ -16,17 +17,26 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: pages-${{ github.ref_name }}
+  group: pages
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          path: source
+
+      - name: Checkout existing Pages site
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: published
 
       - name: Decide destination subfolder
         id: dest
@@ -50,18 +60,73 @@ jobs:
               ;;
           esac
 
-      - name: Mark deploy with .nojekyll
-        run: touch .nojekyll
+      - name: Assemble Pages artifact
+        env:
+          DEST_DIR: ${{ steps.dest.outputs.dir }}
+        run: |
+          set -eu
 
-      - name: Publish to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+          mkdir -p _site
+
+          if [ -d published ]; then
+            cp -a published/. _site/
+            rm -rf _site/.git
+          fi
+
+          copy_source() {
+            target="$1"
+            mkdir -p "$target"
+            rsync -a \
+              --exclude='.git' \
+              --exclude='.github' \
+              --exclude='.claude' \
+              --exclude='.vscode' \
+              --exclude='build' \
+              --exclude='context' \
+              --exclude='SCRATCHPAD.md' \
+              source/ "$target/"
+          }
+
+          if [ "$DEST_DIR" = "." ]; then
+            find _site -mindepth 1 -maxdepth 1 \
+              ! -name beta \
+              ! -name alpha \
+              ! -name CNAME \
+              -exec rm -rf {} +
+            copy_source _site
+          else
+            rm -rf "_site/$DEST_DIR"
+            copy_source "_site/$DEST_DIR"
+          fi
+
+          touch _site/.nojekyll
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./
-          destination_dir: ${{ steps.dest.outputs.dir }}
-          keep_files: true
-          exclude_assets: '.github,build,context,.claude'
-          commit_message: "Deploy ${{ steps.dest.outputs.label }} from ${{ github.sha }}"
-          user_name: "github-actions[bot]"
-          user_email: "github-actions[bot]@users.noreply.github.com"
+          path: _site
+          include-hidden-files: true
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Give Pages artifact processing a moment
+        run: sleep 30
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+        with:
+          timeout: 900000
+          error_count: 20
+          reporting_interval: 10000

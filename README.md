@@ -30,6 +30,21 @@ Then visit `http://127.0.0.1:8019/index.html`. Use port `8019` by convention
 so preview startup and cleanup stay predictable. If that port is occupied, use
 the next nearby port, note it, and stop the server when checks are done.
 
+## Deployments
+
+GitHub Pages should be configured with **Source: GitHub Actions**. The deploy
+workflow runs for `main`, `beta`, and `alpha`, queues them through one global
+Pages concurrency group, assembles a full Pages artifact, and replaces only the
+current channel:
+
+- `main` publishes to `/`.
+- `beta` publishes to `/beta/`.
+- `alpha` publishes to `/alpha/`.
+
+The app has no build output folder. The workflow stages the checked-out source
+into `_site` and preserves the other deployed channel folders from the current
+published site before uploading the artifact.
+
 ## Build The Icon Assets
 
 The repo ships with generated PNG icons and the dual-theme `favicon.svg`
