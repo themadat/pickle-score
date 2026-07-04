@@ -32,18 +32,23 @@ the next nearby port, note it, and stop the server when checks are done.
 
 ## Deployments
 
-GitHub Pages should be configured with **Source: GitHub Actions**. The deploy
-workflow runs for `main`, `beta`, and `alpha`, queues them through one global
-Pages concurrency group, assembles a full Pages artifact, and replaces only the
-current channel:
+GitHub Pages should be configured with **Source: GitHub Actions**. The
+`github-pages` environment must allow `main`, `beta`, and `alpha` to deploy;
+use either **No restriction** or selected branch rules for all three branches.
+
+The deploy workflow runs for `main`, `beta`, and `alpha`, queues them through
+one global Pages concurrency group, assembles a full Pages artifact, and
+replaces only the current channel:
 
 - `main` publishes to `/`.
 - `beta` publishes to `/beta/`.
 - `alpha` publishes to `/alpha/`.
 
 The app has no build output folder. The workflow stages the checked-out source
-into `_site` and preserves the other deployed channel folders from the current
-published site before uploading the artifact.
+into `_site`, preserves the other deployed channel folders from the latest
+`gh-pages` snapshot, saves the updated snapshot back to `gh-pages`, and then
+uploads the artifact. Pages source should stay set to GitHub Actions so the
+`gh-pages` push is only state storage, not the publishing mechanism.
 
 ## Build The Icon Assets
 

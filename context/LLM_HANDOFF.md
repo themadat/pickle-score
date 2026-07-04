@@ -128,11 +128,12 @@ with the title double-quoted.
 - User data lives in browser localStorage. Export/import support uses text,
   CSV, and JSON backup flows. The app should continue to run over `file://`.
 - No backend, bundler, package manager, or runtime dependencies.
-- GitHub Pages deploys require repository Pages Source = GitHub Actions.
-  `.github/workflows/deploy.yml` queues `main`, `beta`, and `alpha` in one
-  global Pages concurrency group, stages a full `_site` artifact, preserves the
-  other published channel folders from the existing Pages site, then deploys
-  with `actions/deploy-pages`.
+- GitHub Pages deploys require repository Pages Source = GitHub Actions and
+  the `github-pages` environment must allow `main`, `beta`, and `alpha` to
+  deploy. `.github/workflows/deploy.yml` queues all three in one global Pages
+  concurrency group, stages a full `_site` artifact, preserves other published
+  channel folders from the `gh-pages` snapshot branch, saves the refreshed
+  snapshot back to `gh-pages`, then deploys with `actions/deploy-pages`.
 - Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.5
   "Next Rally".
 
