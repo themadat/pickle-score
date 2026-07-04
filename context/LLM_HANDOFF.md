@@ -121,15 +121,15 @@ with the title double-quoted.
   `APP_VERSION`.
 - Docs: `README.md` (public/run/build), this handoff (all dev + LLM context),
   `AGENTS.md` + `CLAUDE.md` (thin auto-loaded summaries).
-- Current version: `APP_VERSION = "1.0.0.4"` - active build line,
-  "Win Call": matchup cards use larger side-by-side partner name tiles, and
-  Score entry has a Score / Win Only toggle that can save a winner without
-  point totals.
+- Current version: `APP_VERSION = "1.0.0.5"` - active build line,
+  "Next Rally": matchup cards stack each team's two players vertically in a
+  two-team grid, Score view uses compact iPhone-fit styling with no scrolling,
+  and saving a game opens Same Teams / Different Matchup / New Group choices.
 - User data lives in browser localStorage. Export/import support uses text,
   CSV, and JSON backup flows. The app should continue to run over `file://`.
 - No backend, bundler, package manager, or runtime dependencies.
-- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.4
-  "Win Call".
+- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.5
+  "Next Rally".
 
 ## Rules
 
@@ -193,8 +193,8 @@ python3 -m http.server 8019
 - `index.html` constants: `APP_VERSION`, `STORAGE_KEY`, `DEFAULT_STATE`.
 - State lifecycle: `loadState`, `normalizeState`, `saveState`, `saveAndRender`.
 - Draft/game flow: `togglePlayerInDraft`, `openMatchups`, `matchupOptions`,
-  `chooseMatchup`, `syncScoreFromQuick`, `saveGame`, `loadRematch`,
-  `deleteGame`.
+  `chooseMatchup`, `syncScoreFromQuick`, `saveGame`, `playSameTeamsAgain`,
+  `chooseDifferentMatchup`, `loadRematch`, `deleteGame`.
 - Roster: `addPlayersFromText`, `renamePlayer`, `hidePlayer`,
   `activePlayers`, `usedPlayerIds`.
 - Rankings: `buildStats`, `buildPairStats`, `renderRankings`.
@@ -250,19 +250,24 @@ Important invariants:
 
 ## Current Surface
 
-- Record: singles/doubles mode, team slots, player quick add/search, winner
-  selection, loser-score shortcuts, manual score adjustment, clear/swap/rematch.
+- Players: sorted player selection, search-as-you-type, quick add, and Go once
+  four players are selected.
+- Matchups: three doubles pairing choices for the selected four-player group.
+- Score: compact iPhone-first scoring, Score / Win Only mode, winner selection,
+  loser-score shortcuts, manual score adjustment, clear/swap/rematch.
+- Next: after saving, Same Teams starts another game, Different Matchup returns
+  to the same group's matchup choices, and New Group returns to player select.
 - Rank: top-level stats, player ratings, win/loss, point differential, best
   doubles pairs.
 - Games: reverse-chronological game list, undo last, delete individual games.
 - Data: roster management, bulk name import, text/CSV/JSON export, JSON restore,
   wipe flow, share/copy/download helpers.
-- Theme: local light/dark toggle saved in settings, available in the top bar and
-  Settings dialog.
-- Install: top-bar Add as App opens device-matched directions and persists
-  light/dark install icon preference through `psInstallIconVariant`; web
-  manifests and generated icon assets are present for add-to-home and favicon
-  surfaces.
+- Theme: local light/dark toggle saved in settings, available in the Settings
+  dialog.
+- Install: Settings opens Add as App with device-matched directions and
+  persists light/dark install icon preference through `psInstallIconVariant`;
+  web manifests and generated icon assets are present for add-to-home and
+  favicon surfaces.
 - Settings: top-bar Settings dialog exposes theme controls, Add as App, Data tab
   handoff, and app/version metadata.
 
