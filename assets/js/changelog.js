@@ -1,5 +1,33 @@
 const CHANGELOG = [
   {
+    version: "1.0.0.4",
+    date: "2026-07-04",
+    title: "Win Call",
+    summary: "Matchup choices are easier to read and games can be saved as win-only results.",
+    highlights: [
+      "Made matchup cards bigger with side-by-side partner names.",
+      "Added a Score or Win Only toggle on the scoring screen.",
+      "Saved scoreless wins with a winner and no point totals.",
+      "Kept rankings, history, text export, and CSV export aware of scoreless wins."
+    ],
+    updateSections: [
+      {
+        heading: "Matchups",
+        items: [
+          "Expanded matchup cards to use more of the screen with larger player-name tiles.",
+          "Placed doubles partners side by side inside each team choice."
+        ]
+      },
+      {
+        heading: "Scoring",
+        items: [
+          "Added Win Only mode for recording a winner without entering a score.",
+          "Scoreless wins count in records and ratings without adding point differential."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0.0.3",
     date: "2026-07-04",
     title: "Court Flow",

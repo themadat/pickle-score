@@ -121,16 +121,15 @@ with the title double-quoted.
   `APP_VERSION`.
 - Docs: `README.md` (public/run/build), this handoff (all dev + LLM context),
   `AGENTS.md` + `CLAUDE.md` (thin auto-loaded summaries).
-- Current version: `APP_VERSION = "1.0.0.3"` - active build line,
-  "Court Flow": top toolbar reduced to Settings, opening Players screen sorted
-  by games played then alphabetically, search-as-you-type player filtering,
-  four-player Go action, three doubles matchup choices, and score entry after
-  matchup selection.
+- Current version: `APP_VERSION = "1.0.0.4"` - active build line,
+  "Win Call": matchup cards use larger side-by-side partner name tiles, and
+  Score entry has a Score / Win Only toggle that can save a winner without
+  point totals.
 - User data lives in browser localStorage. Export/import support uses text,
   CSV, and JSON backup flows. The app should continue to run over `file://`.
 - No backend, bundler, package manager, or runtime dependencies.
-- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.3
-  "Court Flow".
+- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.4
+  "Win Call".
 
 ## Rules
 
@@ -226,10 +225,10 @@ State basics:
 {
   appVersion,
   players: [{ id, name, active }],
-  games: [{ id, playedAt, mode, teamA, teamB, teamANames, teamBNames, scoreA, scoreB }],
+  games: [{ id, playedAt, mode, teamA, teamB, teamANames, teamBNames, scoreRecorded, winner, scoreA, scoreB }],
   lastTeams,
   settings: { theme },
-  draft: { mode, teamA, teamB, focus, winner, winScore, loserScore, scoreA, scoreB }
+  draft: { mode, selectedPlayers, teamA, teamB, focus, winner, scoreMode, winScore, loserScore, scoreA, scoreB }
 }
 ```
 
@@ -238,8 +237,11 @@ Important invariants:
 - `mode` is `singles` or `doubles`; team size derives from it.
 - Draft teams contain active player ids that exist in `state.players`.
 - Scores are integer-ish numbers clamped between 0 and 99.
-- Winner cannot be tied; save is disabled while tied or while teams are
-  incomplete.
+- Scoreless wins use `scoreRecorded: false`, `winner: "A" | "B"`, and
+  `scoreA`/`scoreB` as `null`; stats count the win with zero point
+  differential.
+- Score mode cannot be tied; save is disabled while score mode is tied or teams
+  are incomplete. Win Only mode saves once both teams are filled.
 - Games keep `teamANames` and `teamBNames` snapshots so old games remain
   readable after roster edits.
 - Hidden players remain available to historical games and can be restored.
