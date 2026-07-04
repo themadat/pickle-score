@@ -337,13 +337,15 @@
     }
 
     #view-players .panel,
-    #view-matchups .panel {
+    #view-matchups .panel,
+    #view-next .panel {
       display: grid;
       gap: 10px;
     }
 
     #view-players .panel-header,
-    #view-matchups .panel-header {
+    #view-matchups .panel-header,
+    #view-next .panel-header {
       margin-bottom: 0;
     }
 
@@ -740,7 +742,7 @@
       align-items: stretch;
       gap: 10px;
       width: 100%;
-      min-height: 128px;
+      min-height: 168px;
       border: 1px solid var(--line);
       background: var(--panel);
       padding: 12px;
@@ -754,7 +756,8 @@
 
     .matchup-team {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr 1fr;
       align-content: center;
       gap: 8px;
       min-width: 0;
@@ -783,7 +786,19 @@
       font-weight: 850;
       text-align: center;
       text-overflow: ellipsis;
-      overflow-wrap: anywhere;
+      white-space: nowrap;
+    }
+
+    .matchup-player.fit-sm {
+      font-size: 0.98rem;
+    }
+
+    .matchup-player.fit-xs {
+      font-size: 0.86rem;
+    }
+
+    .matchup-player.fit-xxs {
+      font-size: 0.74rem;
     }
 
     .matchup-vs {
@@ -801,6 +816,59 @@
 
     :root[data-theme="light"] .matchup-vs {
       color: #ffffff;
+    }
+
+    .next-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .next-choice {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 10px;
+      min-height: 62px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      padding: 10px;
+      text-align: left;
+    }
+
+    .next-choice .button-symbol {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 999px;
+      color: #06110b;
+      background: var(--accent);
+    }
+
+    :root[data-theme="light"] .next-choice .button-symbol {
+      color: #ffffff;
+    }
+
+    .next-choice .sf-symbol {
+      width: 18px;
+      height: 18px;
+    }
+
+    .next-choice-copy {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .next-choice-title {
+      color: var(--text);
+      font-weight: 900;
+    }
+
+    .next-choice-detail {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.25;
     }
 
     .empty {
@@ -1325,6 +1393,144 @@
       transform: translate(-50%, 0);
     }
 
+    :root[data-view="score"] body {
+      overflow: hidden;
+    }
+
+    :root[data-view="score"] .app {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-height: 100dvh;
+      overflow: hidden;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+
+    :root[data-view="score"] .topbar {
+      gap: 8px;
+      padding-bottom: 6px;
+    }
+
+    :root[data-view="score"] .app-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+    }
+
+    :root[data-view="score"] h1 {
+      font-size: 1.05rem;
+    }
+
+    :root[data-view="score"] .mini-stats {
+      display: none;
+    }
+
+    :root[data-view="score"] #view-score.view.active {
+      align-content: start;
+      gap: 6px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    :root[data-view="score"] #view-score .panel {
+      padding: 8px;
+    }
+
+    :root[data-view="score"] #view-score .panel-header {
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    :root[data-view="score"] .team-board {
+      gap: 6px;
+    }
+
+    :root[data-view="score"] .team {
+      gap: 6px;
+      padding: 7px;
+    }
+
+    :root[data-view="score"] .team-title {
+      min-height: 22px;
+      font-size: 0.7rem;
+    }
+
+    :root[data-view="score"] .score-badge {
+      min-width: 30px;
+      padding: 2px 7px;
+      font-size: 0.82rem;
+    }
+
+    :root[data-view="score"] .slots {
+      gap: 5px;
+    }
+
+    :root[data-view="score"] .slot {
+      min-height: 32px;
+      padding: 5px 7px;
+      font-size: 0.9rem;
+    }
+
+    :root[data-view="score"] .winner-button,
+    :root[data-view="score"] .winner-button.icon-button,
+    :root[data-view="score"] .actions .icon-button {
+      min-height: 32px;
+    }
+
+    :root[data-view="score"] .actions {
+      gap: 6px;
+    }
+
+    :root[data-view="score"] .score-panel {
+      gap: 8px;
+    }
+
+    :root[data-view="score"] .score-only {
+      gap: 8px;
+    }
+
+    :root[data-view="score"] .segmented button {
+      min-height: 32px;
+      font-size: 0.9rem;
+    }
+
+    :root[data-view="score"] .score-grid {
+      grid-template-columns: 42px 1fr 42px 42px 1fr 42px;
+      gap: 5px;
+    }
+
+    :root[data-view="score"] .score-grid button {
+      min-height: 38px;
+      font-size: 1rem;
+    }
+
+    :root[data-view="score"] .score-number {
+      min-height: 42px;
+      font-size: 1.55rem;
+    }
+
+    :root[data-view="score"] h3 {
+      font-size: 0.72rem;
+    }
+
+    :root[data-view="score"] .loser-grid {
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+    }
+
+    :root[data-view="score"] .loser-grid button {
+      min-height: 30px;
+      font-size: 0.9rem;
+    }
+
+    :root[data-view="score"] .win-only-note {
+      padding: 8px;
+      font-size: 0.82rem;
+    }
+
+    :root[data-view="score"] .save-button {
+      min-height: 44px;
+    }
+
     .muted {
       color: var(--muted);
     }
@@ -1385,11 +1591,17 @@
         grid-template-columns: 1fr auto 1fr;
         gap: 6px;
         padding: 8px;
+        min-height: 152px;
       }
 
       .matchup-vs {
         min-width: 34px;
         min-height: 34px;
+      }
+
+      .matchup-player {
+        min-height: 52px;
+        padding: 6px;
       }
 
       .setting-row,
@@ -1494,6 +1706,35 @@
         </div>
         <p class="win-only-note">Choose the winning team above, then save the win without point totals.</p>
         <button class="save-button" id="saveGame" type="button">Save Game</button>
+      </div>
+    </section>
+
+    <section class="view" id="view-next" aria-labelledby="nextTitle">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 id="nextTitle">Game Saved</h2>
+          <span class="muted" id="nextGameSummary"></span>
+        </div>
+        <div class="next-actions">
+          <button type="button" class="next-choice" id="nextSameTeams">
+            <span class="next-choice-copy">
+              <span class="next-choice-title">Same teams</span>
+              <span class="next-choice-detail">Start another game with this matchup.</span>
+            </span>
+          </button>
+          <button type="button" class="next-choice" id="nextDifferentMatchup">
+            <span class="next-choice-copy">
+              <span class="next-choice-title">Different matchup</span>
+              <span class="next-choice-detail">Pick another pairing from this group.</span>
+            </span>
+          </button>
+          <button type="button" class="next-choice" id="nextNewGroup">
+            <span class="next-choice-copy">
+              <span class="next-choice-title">New group</span>
+              <span class="next-choice-detail">Go back to the player list.</span>
+            </span>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -1677,7 +1918,7 @@
     (function () {
       "use strict";
 
-      var APP_VERSION = "1.0.0.4";
+      var APP_VERSION = "1.0.0.5";
       var STORAGE_KEY = "pickle-score-state-v1";
       var INSTALL_ICON_KEY = "psInstallIconVariant";
       var DEFAULT_STATE = {
@@ -1737,6 +1978,10 @@
         teamBoard: document.getElementById("teamBoard"),
         scoreBack: document.getElementById("scoreBack"),
         scorePanel: document.getElementById("scorePanel"),
+        nextGameSummary: document.getElementById("nextGameSummary"),
+        nextSameTeams: document.getElementById("nextSameTeams"),
+        nextDifferentMatchup: document.getElementById("nextDifferentMatchup"),
+        nextNewGroup: document.getElementById("nextNewGroup"),
         clearDraft: document.getElementById("clearDraft"),
         swapTeams: document.getElementById("swapTeams"),
         rematch: document.getElementById("rematch"),
@@ -1783,6 +2028,7 @@
         applyTheme();
         syncScoreFromQuick();
         renderAll();
+        showView("players");
       }
 
       function bindEvents() {
@@ -1875,6 +2121,10 @@
         els.scoreBack.addEventListener("click", function () {
           showView("matchups");
         });
+
+        els.nextSameTeams.addEventListener("click", playSameTeamsAgain);
+        els.nextDifferentMatchup.addEventListener("click", chooseDifferentMatchup);
+        els.nextNewGroup.addEventListener("click", clearDraftTeams);
 
         els.matchupList.addEventListener("click", function (event) {
           var option = event.target.closest("[data-matchup-index]");
@@ -2018,6 +2268,7 @@
       }
 
       function showView(viewName) {
+        els.html.dataset.view = viewName;
         els.tabs.forEach(function (tab) {
           tab.classList.toggle("active", tab.dataset.view === viewName);
         });
@@ -2178,6 +2429,20 @@
         button.title = label;
       }
 
+      function setIconTextButton(button, iconName, label, detail) {
+        if (!button) {
+          return;
+        }
+        button.innerHTML =
+          "<span class=\"button-symbol\" aria-hidden=\"true\">" + iconSvg(iconName) + "</span>" +
+          "<span class=\"next-choice-copy\">" +
+            "<span class=\"next-choice-title\">" + esc(label) + "</span>" +
+            "<span class=\"next-choice-detail\">" + esc(detail) + "</span>" +
+          "</span>";
+        button.setAttribute("aria-label", label);
+        button.title = label;
+      }
+
       function iconButtonHtml(className, attrs, iconName, label) {
         var classes = ((className || "") + " icon-button").trim();
         return (
@@ -2194,6 +2459,9 @@
         setIconButton(els.playersGo, "play", "Go");
         setIconButton(els.matchupsBack, "arrowCounterclockwise", "Back to players");
         setIconButton(els.scoreBack, "arrowCounterclockwise", "Back to matchups");
+        setIconTextButton(els.nextSameTeams, "arrowClockwise", "Same teams", "Start another game with this matchup.");
+        setIconTextButton(els.nextDifferentMatchup, "swap", "Different matchup", "Pick another pairing from this group.");
+        setIconTextButton(els.nextNewGroup, "addPlayer", "New group", "Go back to the player list.");
         setIconButton(els.clearDraft, "clear", "Clear teams");
         setIconButton(els.swapTeams, "swap", "Swap teams");
         setIconButton(els.rematch, "arrowClockwise", "Rematch");
@@ -2633,6 +2901,57 @@
         showView("players");
       }
 
+      function resetDraftResult() {
+        state.draft.focus = { team: "A", index: 0 };
+        state.draft.winner = "A";
+        state.draft.loserScore = Math.min(9, state.draft.winScore - 1);
+        syncScoreFromQuick();
+      }
+
+      function showSavedGameChoices(groupIds) {
+        state.draft.selectedPlayers = uniqueExistingIds(groupIds || []);
+        state.draft.teamA = [];
+        state.draft.teamB = [];
+        resetDraftResult();
+        saveAndRender();
+        showView("next");
+      }
+
+      function playSameTeamsAgain() {
+        if (!state.lastTeams) {
+          showToast("No saved teams");
+          showView("players");
+          return;
+        }
+        state.draft.mode = state.lastTeams.mode === "singles" ? "singles" : "doubles";
+        state.draft.teamA = uniqueExistingIds(state.lastTeams.teamA || []).slice(0, teamSize());
+        state.draft.teamB = uniqueExistingIds(state.lastTeams.teamB || []).filter(function (id) {
+          return state.draft.teamA.indexOf(id) < 0;
+        }).slice(0, teamSize());
+        state.draft.selectedPlayers = uniqueExistingIds(state.draft.teamA.concat(state.draft.teamB)).slice(0, 4);
+        resetDraftResult();
+        saveAndRender();
+        showView("score");
+      }
+
+      function chooseDifferentMatchup() {
+        var group = selectedPlayerIds();
+        if (group.length !== 4 && state.lastTeams) {
+          group = uniqueExistingIds((state.lastTeams.teamA || []).concat(state.lastTeams.teamB || [])).slice(0, 4);
+        }
+        if (group.length !== 4) {
+          showToast("Pick 4 players");
+          showView("players");
+          return;
+        }
+        state.draft.selectedPlayers = group;
+        state.draft.teamA = [];
+        state.draft.teamB = [];
+        resetDraftResult();
+        saveAndRender();
+        showView("matchups");
+      }
+
       function loadRematch() {
         var source = state.lastTeams;
         var last = state.games[state.games.length - 1];
@@ -2701,6 +3020,7 @@
           showToast(saveButtonText());
           return;
         }
+        var groupIds = selectedPlayerIds();
         var scoreRecorded = state.draft.scoreMode !== "win";
         var winner = scoreRecorded ? (state.draft.scoreA > state.draft.scoreB ? "A" : "B") : state.draft.winner;
         var game = {
@@ -2722,7 +3042,7 @@
           teamA: game.teamA.slice(),
           teamB: game.teamB.slice()
         };
-        clearDraftTeams();
+        showSavedGameChoices(groupIds);
         showToast("Game saved");
       }
 
@@ -2830,6 +3150,7 @@
         renderScore();
         renderRoster();
         renderMatchups();
+        renderNextGame();
         renderRankings();
         renderGames();
         renderData();
@@ -2966,10 +3287,32 @@
           "<span class=\"matchup-team\">" +
             "<span class=\"matchup-team-label\">" + esc(label) + "</span>" +
             ids.map(function (id) {
-              return "<span class=\"matchup-player\">" + esc(playerName(id)) + "</span>";
+              var name = playerName(id);
+              return "<span class=\"matchup-player " + nameFitClass(name) + "\" title=\"" + esc(name) + "\">" + esc(name) + "</span>";
             }).join("") +
           "</span>"
         );
+      }
+
+      function nameFitClass(name) {
+        var length = String(name || "").length;
+        if (length > 20) {
+          return "fit-xxs";
+        }
+        if (length > 15) {
+          return "fit-xs";
+        }
+        if (length > 11) {
+          return "fit-sm";
+        }
+        return "";
+      }
+
+      function renderNextGame() {
+        var group = selectedPlayerIds();
+        els.nextGameSummary.textContent = group.length === 4 ? "4 players ready" : "";
+        els.nextSameTeams.disabled = !state.lastTeams;
+        els.nextDifferentMatchup.disabled = group.length !== 4;
       }
 
       function buildStats() {

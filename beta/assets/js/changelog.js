@@ -1,5 +1,33 @@
 const CHANGELOG = [
   {
+    version: "1.0.0.5",
+    date: "2026-07-04",
+    title: "Next Rally",
+    summary: "Matchup cards and post-game flow are tuned for faster iPhone use.",
+    highlights: [
+      "Stacked matchup names into two team columns to keep names readable.",
+      "Compressed the score screen to fit an iPhone viewport without scrolling.",
+      "Added post-save choices for same teams or a different matchup.",
+      "Kept the four-player group ready after saving a game."
+    ],
+    updateSections: [
+      {
+        heading: "Matchups",
+        items: [
+          "Changed matchup cards so each team stacks its two players vertically.",
+          "Added length-based name fitting classes to avoid wrapping common long names."
+        ]
+      },
+      {
+        heading: "Scoring",
+        items: [
+          "Added compact score-screen styling when Score is active.",
+          "After saving, the app offers Same Teams, Different Matchup, or New Group actions."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0.0.4",
     date: "2026-07-04",
     title: "Win Call",
