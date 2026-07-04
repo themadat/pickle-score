@@ -1,5 +1,32 @@
 const CHANGELOG = [
   {
+    version: "1.0.0.2",
+    date: "2026-07-04",
+    title: "Symbol Serve",
+    summary: "Command buttons now use the shared Visit Tracker-style symbol set.",
+    highlights: [
+      "Added a focused Pickle Score icon constant file copied from Visit Tracker.",
+      "Changed app, tab, scoring, roster, data, and dialog commands to symbols.",
+      "Kept accessible labels and tooltips on symbol-only controls."
+    ],
+    updateSections: [
+      {
+        heading: "Symbols",
+        items: [
+          "Added assets/js/icons.js with the command symbols Pickle Score needs.",
+          "Loaded the symbol set before the main app script so render paths can share one icon map."
+        ]
+      },
+      {
+        heading: "Controls",
+        items: [
+          "Converted command buttons to icon-only controls while preserving aria labels and title text.",
+          "Kept player names, score values, and choice labels readable where text is the data itself."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0.0.1",
     date: "2026-07-04",
     title: "Home Court",
