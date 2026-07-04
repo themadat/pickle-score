@@ -121,15 +121,16 @@ with the title double-quoted.
   `APP_VERSION`.
 - Docs: `README.md` (public/run/build), this handoff (all dev + LLM context),
   `AGENTS.md` + `CLAUDE.md` (thin auto-loaded summaries).
-- Current version: `APP_VERSION = "1.0.0.2"` - active build line,
-  "Symbol Serve": top-bar app icon, Add as App dialog with persisted light/dark
-  install icon choice and device directions, Settings dialog, version pills,
-  Visit Tracker-style icon constants, and symbol-only command buttons.
+- Current version: `APP_VERSION = "1.0.0.3"` - active build line,
+  "Court Flow": top toolbar reduced to Settings, opening Players screen sorted
+  by games played then alphabetically, search-as-you-type player filtering,
+  four-player Go action, three doubles matchup choices, and score entry after
+  matchup selection.
 - User data lives in browser localStorage. Export/import support uses text,
   CSV, and JSON backup flows. The app should continue to run over `file://`.
 - No backend, bundler, package manager, or runtime dependencies.
-- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.2
-  "Symbol Serve".
+- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.3
+  "Court Flow".
 
 ## Rules
 
@@ -192,8 +193,9 @@ python3 -m http.server 8019
 
 - `index.html` constants: `APP_VERSION`, `STORAGE_KEY`, `DEFAULT_STATE`.
 - State lifecycle: `loadState`, `normalizeState`, `saveState`, `saveAndRender`.
-- Draft/game flow: `setMode`, `togglePlayerInDraft`, `syncScoreFromQuick`,
-  `saveGame`, `loadRematch`, `deleteGame`.
+- Draft/game flow: `togglePlayerInDraft`, `openMatchups`, `matchupOptions`,
+  `chooseMatchup`, `syncScoreFromQuick`, `saveGame`, `loadRematch`,
+  `deleteGame`.
 - Roster: `addPlayersFromText`, `renamePlayer`, `hidePlayer`,
   `activePlayers`, `usedPlayerIds`.
 - Rankings: `buildStats`, `buildPairStats`, `renderRankings`.

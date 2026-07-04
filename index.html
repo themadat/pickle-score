@@ -273,7 +273,6 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      flex-wrap: wrap;
       gap: 6px;
       flex: 0 0 auto;
     }
@@ -335,6 +334,17 @@
     .view.active {
       display: grid;
       gap: 12px;
+    }
+
+    #view-players .panel,
+    #view-matchups .panel {
+      display: grid;
+      gap: 10px;
+    }
+
+    #view-players .panel-header,
+    #view-matchups .panel-header {
+      margin-bottom: 0;
     }
 
     .panel {
@@ -584,6 +594,37 @@
       font-weight: 800;
     }
 
+    .selection-bar,
+    .flow-actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .selection-status {
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    .primary-action {
+      min-width: 54px;
+      color: #06110b;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      font-weight: 900;
+    }
+
+    .primary-action.icon-button {
+      width: 54px;
+      min-width: 54px;
+    }
+
+    :root[data-theme="light"] .primary-action {
+      color: #ffffff;
+    }
+
     .save-button {
       width: 100%;
       min-height: 56px;
@@ -616,7 +657,6 @@
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 8px;
-      margin-bottom: 10px;
     }
 
     .roster-tools .icon-button {
@@ -630,6 +670,8 @@
     }
 
     .player-chip {
+      display: grid;
+      gap: 3px;
       min-height: 44px;
       padding: 7px 9px;
       border: 1px solid var(--line);
@@ -638,8 +680,6 @@
       text-align: left;
       font-weight: 750;
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     .player-chip.selected {
@@ -647,8 +687,85 @@
       background: var(--panel-2);
     }
 
+    .player-chip-name,
+    .player-chip-meta {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .player-chip-meta {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
     .player-chip.hidden {
       display: none;
+    }
+
+    .matchup-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .matchup-option {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: stretch;
+      gap: 8px;
+      width: 100%;
+      min-height: 92px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 10px;
+      text-align: left;
+    }
+
+    .matchup-option:hover,
+    .matchup-option:focus-visible {
+      border-color: var(--accent-2);
+    }
+
+    .matchup-team {
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .matchup-team-label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .matchup-player {
+      min-width: 0;
+      overflow: hidden;
+      color: var(--text);
+      font-weight: 850;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .matchup-vs {
+      display: grid;
+      align-self: center;
+      min-width: 34px;
+      min-height: 34px;
+      place-items: center;
+      border-radius: 999px;
+      color: #06110b;
+      background: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 950;
+    }
+
+    :root[data-theme="light"] .matchup-vs {
+      color: #ffffff;
     }
 
     .empty {
@@ -1222,13 +1339,19 @@
       }
 
       .top-actions {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: auto;
       }
 
       .top-actions button {
         padding: 0 8px;
+      }
+
+      .matchup-option {
+        grid-template-columns: 1fr;
+      }
+
+      .matchup-vs {
+        justify-self: start;
       }
 
       .setting-row,
@@ -1252,27 +1375,48 @@
         </div>
       </div>
       <div class="top-actions" aria-label="App actions">
-        <button class="theme-toggle" id="themeToggle" type="button">Light</button>
-        <button id="addToHomeBtn" type="button">Add as App</button>
         <button id="settingsBtn" type="button">Settings</button>
       </div>
     </header>
 
-    <nav class="tabs" aria-label="Main views">
-      <button class="tab active" type="button" data-view="record">Record</button>
-      <button class="tab" type="button" data-view="rank">Rank</button>
-      <button class="tab" type="button" data-view="games">Games</button>
-      <button class="tab" type="button" data-view="data">Data</button>
-    </nav>
-
-    <section class="view active" id="view-record" aria-labelledby="recordTitle">
+    <section class="view active" id="view-players" aria-labelledby="playersTitle">
       <div class="panel">
         <div class="panel-header">
-          <h2 id="recordTitle">New Game</h2>
-          <div class="segmented two" role="group" aria-label="Game type">
-            <button type="button" data-mode="doubles" class="active">Doubles</button>
-            <button type="button" data-mode="singles">Singles</button>
-          </div>
+          <h2 id="playersTitle">Players</h2>
+          <span class="muted" id="selectionStatus">0 of 4 selected</span>
+        </div>
+        <input id="playerSearch" autocomplete="off" placeholder="Search players" aria-label="Search players">
+        <div class="selection-bar">
+          <span class="selection-status" id="playerOrderNote">Most games first, then A-Z</span>
+          <button class="primary-action" id="playersGo" type="button">Go</button>
+        </div>
+        <div class="roster-grid" id="rosterGrid"></div>
+        <form class="roster-tools" id="quickAddForm">
+          <input id="quickAddName" autocomplete="off" placeholder="Add player" aria-label="Add player">
+          <button type="submit">Add</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="view" id="view-matchups" aria-labelledby="matchupsTitle">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 id="matchupsTitle">Matchups</h2>
+          <span class="muted" id="matchupCount"></span>
+        </div>
+        <div class="matchup-list" id="matchupList"></div>
+        <div class="flow-actions">
+          <span class="selection-status">Choose the pairing being played.</span>
+          <button type="button" id="matchupsBack">Back</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-score" aria-labelledby="scoreTitle">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 id="scoreTitle">Score</h2>
+          <button type="button" id="scoreBack">Matchups</button>
         </div>
         <div class="team-board" id="teamBoard"></div>
       </div>
@@ -1305,19 +1449,6 @@
           <div class="loser-grid" id="loserGrid"></div>
         </div>
         <button class="save-button" id="saveGame" type="button">Save Game</button>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Players</h2>
-          <span class="muted" id="nextSlot"></span>
-        </div>
-        <form class="roster-tools" id="quickAddForm">
-          <input id="quickAddName" autocomplete="off" placeholder="Add player" aria-label="Add player">
-          <button type="submit">Add</button>
-        </form>
-        <input id="playerSearch" autocomplete="off" placeholder="Search players" aria-label="Search players">
-        <div class="roster-grid" id="rosterGrid"></div>
       </div>
     </section>
 
@@ -1471,14 +1602,17 @@
       </section>
 
       <section class="settings-section">
-        <h3>Data</h3>
+        <h3>Views</h3>
         <div class="setting-row">
           <div class="setting-label">
-            Export and backup
-            <small>Use the Data tab for roster management, exports, import, and wipe.</small>
+            Open screen
+            <small>Jump to players, rankings, game history, or data tools.</small>
           </div>
           <div class="settings-actions">
-            <button id="settingsDataBtn" type="button">Data Tab</button>
+            <button id="settingsPlayersBtn" type="button">Players</button>
+            <button id="settingsRankBtn" type="button">Rank</button>
+            <button id="settingsGamesBtn" type="button">Games</button>
+            <button id="settingsDataBtn" type="button">Data</button>
           </div>
         </div>
       </section>
@@ -1498,7 +1632,7 @@
     (function () {
       "use strict";
 
-      var APP_VERSION = "1.0.0.2";
+      var APP_VERSION = "1.0.0.3";
       var STORAGE_KEY = "pickle-score-state-v1";
       var INSTALL_ICON_KEY = "psInstallIconVariant";
       var DEFAULT_STATE = {
@@ -1511,6 +1645,7 @@
         },
         draft: {
           mode: "doubles",
+          selectedPlayers: [],
           teamA: [],
           teamB: [],
           focus: null,
@@ -1531,8 +1666,6 @@
         miniStats: document.getElementById("miniStats"),
         versionLabel: document.getElementById("versionLabel"),
         settingsVersionLabel: document.getElementById("settingsVersionLabel"),
-        themeToggle: document.getElementById("themeToggle"),
-        addToHomeBtn: document.getElementById("addToHomeBtn"),
         settingsBtn: document.getElementById("settingsBtn"),
         addToHomeDialog: document.getElementById("addToHomeDialog"),
         settingsDialog: document.getElementById("settingsDialog"),
@@ -1543,10 +1676,20 @@
         settingsLightBtn: document.getElementById("settingsLightBtn"),
         settingsDarkBtn: document.getElementById("settingsDarkBtn"),
         settingsInstallBtn: document.getElementById("settingsInstallBtn"),
+        settingsPlayersBtn: document.getElementById("settingsPlayersBtn"),
+        settingsRankBtn: document.getElementById("settingsRankBtn"),
+        settingsGamesBtn: document.getElementById("settingsGamesBtn"),
         settingsDataBtn: document.getElementById("settingsDataBtn"),
         tabs: Array.prototype.slice.call(document.querySelectorAll(".tab")),
         views: Array.prototype.slice.call(document.querySelectorAll(".view")),
+        selectionStatus: document.getElementById("selectionStatus"),
+        playerOrderNote: document.getElementById("playerOrderNote"),
+        playersGo: document.getElementById("playersGo"),
+        matchupCount: document.getElementById("matchupCount"),
+        matchupList: document.getElementById("matchupList"),
+        matchupsBack: document.getElementById("matchupsBack"),
         teamBoard: document.getElementById("teamBoard"),
+        scoreBack: document.getElementById("scoreBack"),
         clearDraft: document.getElementById("clearDraft"),
         swapTeams: document.getElementById("swapTeams"),
         rematch: document.getElementById("rematch"),
@@ -1558,7 +1701,6 @@
         quickAddName: document.getElementById("quickAddName"),
         playerSearch: document.getElementById("playerSearch"),
         rosterGrid: document.getElementById("rosterGrid"),
-        nextSlot: document.getElementById("nextSlot"),
         statStrip: document.getElementById("statStrip"),
         rankingCount: document.getElementById("rankingCount"),
         rankingList: document.getElementById("rankingList"),
@@ -1603,16 +1745,22 @@
           });
         });
 
-        els.themeToggle.addEventListener("click", function () {
-          state.settings.theme = state.settings.theme === "dark" ? "light" : "dark";
-          saveAndRender();
-        });
-
-        els.addToHomeBtn.addEventListener("click", openInstallDialog);
         els.settingsBtn.addEventListener("click", openSettingsDialog);
         els.settingsInstallBtn.addEventListener("click", function () {
           closeDialog(els.settingsDialog);
           openInstallDialog();
+        });
+        els.settingsPlayersBtn.addEventListener("click", function () {
+          closeDialog(els.settingsDialog);
+          showView("players");
+        });
+        els.settingsRankBtn.addEventListener("click", function () {
+          closeDialog(els.settingsDialog);
+          showView("rank");
+        });
+        els.settingsGamesBtn.addEventListener("click", function () {
+          closeDialog(els.settingsDialog);
+          showView("games");
         });
         els.settingsDataBtn.addEventListener("click", function () {
           closeDialog(els.settingsDialog);
@@ -1663,12 +1811,23 @@
           });
         });
 
-        els.teamBoard.addEventListener("click", function (event) {
-          var slot = event.target.closest("[data-slot]");
-          var winner = event.target.closest("[data-winner]");
-          if (slot) {
-            handleSlotClick(slot.dataset.team, Number(slot.dataset.index));
+        els.playersGo.addEventListener("click", openMatchups);
+        els.matchupsBack.addEventListener("click", function () {
+          showView("players");
+        });
+        els.scoreBack.addEventListener("click", function () {
+          showView("matchups");
+        });
+
+        els.matchupList.addEventListener("click", function (event) {
+          var option = event.target.closest("[data-matchup-index]");
+          if (option) {
+            chooseMatchup(Number(option.dataset.matchupIndex));
           }
+        });
+
+        els.teamBoard.addEventListener("click", function (event) {
+          var winner = event.target.closest("[data-winner]");
           if (winner) {
             state.draft.winner = winner.dataset.winner;
             syncScoreFromQuick();
@@ -1866,6 +2025,7 @@
         state.settings = state.settings || {};
         state.settings.theme = state.settings.theme || "dark";
         state.draft = Object.assign(clone(DEFAULT_STATE.draft), state.draft || {});
+        state.draft.selectedPlayers = Array.isArray(state.draft.selectedPlayers) ? state.draft.selectedPlayers : state.draft.teamA.concat(state.draft.teamB);
         state.draft.teamA = Array.isArray(state.draft.teamA) ? state.draft.teamA : [];
         state.draft.teamB = Array.isArray(state.draft.teamB) ? state.draft.teamB : [];
         state.draft.mode = state.draft.mode === "singles" ? "singles" : "doubles";
@@ -1888,6 +2048,7 @@
           game.scoreB = Number(game.scoreB) || 0;
           game.playedAt = game.playedAt || new Date().toISOString();
         });
+        state.draft.selectedPlayers = uniqueExistingIds(state.draft.selectedPlayers).slice(0, 4);
         enforceTeamSize();
       }
 
@@ -1961,23 +2122,10 @@
       }
 
       function renderStaticButtonIcons() {
-        var tabIcons = {
-          record: "play",
-          rank: "chart",
-          games: "list",
-          data: "data"
-        };
-        var tabLabels = {
-          record: "Record",
-          rank: "Rank",
-          games: "Games",
-          data: "Data"
-        };
-        els.tabs.forEach(function (tab) {
-          setIconButton(tab, tabIcons[tab.dataset.view] || "list", tabLabels[tab.dataset.view] || "Open view");
-        });
-        setIconButton(els.addToHomeBtn, "addApp", "Add as App");
         setIconButton(els.settingsBtn, "settings", "Settings");
+        setIconButton(els.playersGo, "play", "Go");
+        setIconButton(els.matchupsBack, "arrowCounterclockwise", "Back to players");
+        setIconButton(els.scoreBack, "arrowCounterclockwise", "Back to matchups");
         setIconButton(els.clearDraft, "clear", "Clear teams");
         setIconButton(els.swapTeams, "swap", "Swap teams");
         setIconButton(els.rematch, "arrowClockwise", "Rematch");
@@ -2001,11 +2149,6 @@
       function applyTheme() {
         els.html.dataset.theme = state.settings.theme;
         els.appIcon.src = state.settings.theme === "dark" ? "assets/icons/icon-192-dark.png" : "assets/icons/icon-192.png";
-        setIconButton(
-          els.themeToggle,
-          state.settings.theme === "dark" ? "sun" : "moon",
-          state.settings.theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
-        );
         renderSettingsControls();
         updateVersionLabels();
       }
@@ -2020,7 +2163,10 @@
         setIconButton(els.settingsLightBtn, "sun", "Light theme");
         setIconButton(els.settingsDarkBtn, "moon", "Dark theme");
         setIconButton(els.settingsInstallBtn, "addApp", "Add as App");
-        setIconButton(els.settingsDataBtn, "data", "Data tab");
+        setIconButton(els.settingsPlayersBtn, "addPlayer", "Players");
+        setIconButton(els.settingsRankBtn, "chart", "Rankings");
+        setIconButton(els.settingsGamesBtn, "list", "Games");
+        setIconButton(els.settingsDataBtn, "data", "Data");
         els.settingsLightBtn.classList.toggle("active", state.settings.theme === "light");
         els.settingsDarkBtn.classList.toggle("active", state.settings.theme === "dark");
         els.settingsLightBtn.setAttribute("aria-pressed", state.settings.theme === "light");
@@ -2252,16 +2398,76 @@
         }).join(" / ");
       }
 
-      function selectedIds() {
-        return state.draft.teamA.concat(state.draft.teamB);
+      function selectedPlayerIds() {
+        return uniqueExistingIds(state.draft.selectedPlayers || []).slice(0, 4);
       }
 
       function selectedSet() {
         var set = {};
-        selectedIds().forEach(function (id) {
+        selectedPlayerIds().forEach(function (id) {
           set[id] = true;
         });
         return set;
+      }
+
+      function playerGameCounts() {
+        var counts = {};
+        state.games.forEach(function (game) {
+          game.teamA.concat(game.teamB).forEach(function (id) {
+            counts[id] = (counts[id] || 0) + 1;
+          });
+        });
+        return counts;
+      }
+
+      function orderedActivePlayers() {
+        var counts = playerGameCounts();
+        return activePlayers().slice().sort(function (a, b) {
+          return (counts[b.id] || 0) - (counts[a.id] || 0) || a.name.localeCompare(b.name);
+        });
+      }
+
+      function selectionReady() {
+        return selectedPlayerIds().length === 4;
+      }
+
+      function matchupOptions() {
+        var ids = selectedPlayerIds();
+        if (ids.length !== 4) {
+          return [];
+        }
+        return [
+          { teamA: [ids[0], ids[1]], teamB: [ids[2], ids[3]] },
+          { teamA: [ids[0], ids[2]], teamB: [ids[1], ids[3]] },
+          { teamA: [ids[0], ids[3]], teamB: [ids[1], ids[2]] }
+        ];
+      }
+
+      function openMatchups() {
+        if (!selectionReady()) {
+          showToast("Pick 4 players");
+          return;
+        }
+        renderMatchups();
+        showView("matchups");
+      }
+
+      function chooseMatchup(index) {
+        var options = matchupOptions();
+        var matchup = options[index];
+        if (!matchup) {
+          showToast("Pick 4 players");
+          showView("players");
+          return;
+        }
+        state.draft.mode = "doubles";
+        state.draft.teamA = matchup.teamA.slice();
+        state.draft.teamB = matchup.teamB.slice();
+        state.draft.focus = null;
+        state.draft.winner = "A";
+        syncScoreFromQuick();
+        saveAndRender();
+        showView("score");
       }
 
       function isValidFocus(focus) {
@@ -2286,33 +2492,10 @@
         return null;
       }
 
-      function focusLabel(slot) {
-        if (!slot) {
-          return "Full";
-        }
-        return "Next " + slot.team + (slot.index + 1);
-      }
-
-      function setSlot(slot, playerId) {
-        if (!slot || !getPlayer(playerId)) {
-          return;
-        }
-        removePlayerFromDraft(playerId);
-        var team = slot.team === "A" ? state.draft.teamA : state.draft.teamB;
-        team[slot.index] = playerId;
-        state.draft.focus = nextEmptySlot();
-      }
-
-      function handleSlotClick(team, index) {
-        var arr = team === "A" ? state.draft.teamA : state.draft.teamB;
-        if (arr[index]) {
-          arr.splice(index, 1);
-        }
-        state.draft.focus = { team: team, index: index };
-        saveAndRender();
-      }
-
       function removePlayerFromDraft(playerId) {
+        state.draft.selectedPlayers = selectedPlayerIds().filter(function (id) {
+          return id !== playerId;
+        });
         state.draft.teamA = state.draft.teamA.filter(function (id) {
           return id !== playerId;
         });
@@ -2325,16 +2508,28 @@
         if (!getPlayer(playerId)) {
           return;
         }
-        if (selectedIds().indexOf(playerId) >= 0) {
-          removePlayerFromDraft(playerId);
-          state.draft.focus = nextEmptySlot();
+        var selected = selectedPlayerIds();
+        if (selected.indexOf(playerId) >= 0) {
+          state.draft.selectedPlayers = selected.filter(function (id) {
+            return id !== playerId;
+          });
+          state.draft.teamA = [];
+          state.draft.teamB = [];
         } else {
-          setSlot(isValidFocus(state.draft.focus) ? state.draft.focus : nextEmptySlot(), playerId);
+          if (selected.length >= 4) {
+            showToast("4 players max");
+            return;
+          }
+          selected.push(playerId);
+          state.draft.selectedPlayers = selected;
+          state.draft.teamA = [];
+          state.draft.teamB = [];
         }
         saveAndRender();
       }
 
       function clearDraftTeams() {
+        state.draft.selectedPlayers = [];
         state.draft.teamA = [];
         state.draft.teamB = [];
         state.draft.focus = { team: "A", index: 0 };
@@ -2342,6 +2537,7 @@
         state.draft.loserScore = Math.min(9, state.draft.winScore - 1);
         syncScoreFromQuick();
         saveAndRender();
+        showView("players");
       }
 
       function loadRematch() {
@@ -2357,9 +2553,11 @@
         state.draft.mode = source.mode === "singles" ? "singles" : "doubles";
         state.draft.teamA = source.teamA.slice();
         state.draft.teamB = source.teamB.slice();
+        state.draft.selectedPlayers = uniqueExistingIds(state.draft.teamA.concat(state.draft.teamB)).slice(0, 4);
         state.draft.focus = nextEmptySlot();
         syncScoreFromQuick();
         saveAndRender();
+        showView("score");
         showToast("Teams loaded");
       }
 
@@ -2525,6 +2723,7 @@
         renderTeams();
         renderScore();
         renderRoster();
+        renderMatchups();
         renderRankings();
         renderGames();
         renderData();
@@ -2550,21 +2749,17 @@
 
       function renderTeams() {
         var score = { A: state.draft.scoreA, B: state.draft.scoreB };
-        var focus = state.draft.focus || nextEmptySlot();
-        els.nextSlot.textContent = focusLabel(focus);
         els.teamBoard.innerHTML = ["A", "B"].map(function (team) {
           var ids = team === "A" ? state.draft.teamA : state.draft.teamB;
           var slots = [];
           for (var i = 0; i < teamSize(); i += 1) {
             var id = ids[i];
-            var focused = focus && focus.team === team && focus.index === i;
             slots.push(
-              "<button type=\"button\" class=\"slot " +
+              "<div class=\"slot " +
               (id ? "filled " : "") +
-              (focused ? "focused" : "") +
-              "\" data-slot=\"1\" data-team=\"" + team + "\" data-index=\"" + i + "\">" +
+              "\">" +
               esc(id ? playerName(id) : team + (i + 1)) +
-              "</button>"
+              "</div>"
             );
           }
           return (
@@ -2601,20 +2796,66 @@
       function renderRoster() {
         var query = els.playerSearch.value.trim().toLowerCase();
         var selected = selectedSet();
-        var players = activePlayers();
+        var counts = playerGameCounts();
+        var players = orderedActivePlayers();
+        var filtered = players.filter(function (player) {
+          return !query || player.name.toLowerCase().indexOf(query) >= 0;
+        });
+        var selectedCount = selectedPlayerIds().length;
+        els.selectionStatus.textContent = selectedCount + " of 4 selected";
+        els.playersGo.disabled = !selectionReady();
+        els.playerOrderNote.textContent = query ? filtered.length + " matching" : "Most games first, then A-Z";
         if (!players.length) {
           els.rosterGrid.innerHTML = "<div class=\"empty\">No players yet</div>";
           return;
         }
-        els.rosterGrid.innerHTML = players.map(function (player) {
-          var hidden = query && player.name.toLowerCase().indexOf(query) < 0;
+        if (!filtered.length) {
+          els.rosterGrid.innerHTML = "<div class=\"empty\">No matching players</div>";
+          return;
+        }
+        els.rosterGrid.innerHTML = filtered.map(function (player) {
+          var count = counts[player.id] || 0;
           return (
             "<button type=\"button\" class=\"player-chip " +
             (selected[player.id] ? "selected " : "") +
-            (hidden ? "hidden" : "") +
-            "\" data-player=\"" + esc(player.id) + "\">" + esc(player.name) + "</button>"
+            "\" data-player=\"" + esc(player.id) + "\" aria-pressed=\"" + (selected[player.id] ? "true" : "false") + "\">" +
+              "<span class=\"player-chip-name\">" + esc(player.name) + "</span>" +
+              "<span class=\"player-chip-meta\">" + count + " game" + (count === 1 ? "" : "s") + "</span>" +
+            "</button>"
           );
         }).join("");
+      }
+
+      function renderMatchups() {
+        var options = matchupOptions();
+        var ids = selectedPlayerIds();
+        els.matchupCount.textContent = ids.length === 4 ? "3 options" : "Pick 4 players";
+        if (!options.length) {
+          els.matchupList.innerHTML = "<div class=\"empty\">Pick four players to see matchups</div>";
+          return;
+        }
+        els.matchupList.innerHTML = options.map(function (matchup, index) {
+          var teamALabel = teamNames(matchup.teamA);
+          var teamBLabel = teamNames(matchup.teamB);
+          return (
+            "<button type=\"button\" class=\"matchup-option\" data-matchup-index=\"" + index + "\" aria-label=\"" + esc(teamALabel + " versus " + teamBLabel) + "\">" +
+              matchupTeamHtml("Team A", matchup.teamA) +
+              "<span class=\"matchup-vs\">VS</span>" +
+              matchupTeamHtml("Team B", matchup.teamB) +
+            "</button>"
+          );
+        }).join("");
+      }
+
+      function matchupTeamHtml(label, ids) {
+        return (
+          "<span class=\"matchup-team\">" +
+            "<span class=\"matchup-team-label\">" + esc(label) + "</span>" +
+            ids.map(function (id) {
+              return "<span class=\"matchup-player\">" + esc(playerName(id)) + "</span>";
+            }).join("") +
+          "</span>"
+        );
       }
 
       function buildStats() {
