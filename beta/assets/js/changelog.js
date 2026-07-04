@@ -1,5 +1,33 @@
 const CHANGELOG = [
   {
+    version: "1.0.0.3",
+    date: "2026-07-04",
+    title: "Court Flow",
+    summary: "The app now opens on player selection before matchup and score entry.",
+    highlights: [
+      "Reduced the top toolbar to the Settings button.",
+      "Made Players the opening screen with search-as-you-type filtering.",
+      "Sorted player selection by games played, then alphabetically.",
+      "Added the three possible doubles matchup choices before scoring."
+    ],
+    updateSections: [
+      {
+        heading: "Flow",
+        items: [
+          "Changed the default app path to Players, then Matchups, then Score.",
+          "The Go action requires exactly four selected players before showing pairings."
+        ]
+      },
+      {
+        heading: "Selection",
+        items: [
+          "Player chips now show game counts and selected state.",
+          "Four-player selections generate all three doubles pairings for quick score entry."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0.0.2",
     date: "2026-07-04",
     title: "Symbol Serve",

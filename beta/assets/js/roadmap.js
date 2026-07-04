@@ -46,5 +46,17 @@ const WISHLIST_SEEDS = [
     tokenCostPct: 12,
     prompt: "Add a local recap generator from existing stats with copy/share/download controls and no remote services.",
     category: "Export"
+  },
+  {
+    title: "Flexible Player Pools",
+    ticketId: "WISH-005",
+    description: "Let a session start with more than four selected players, then choose or rotate the four people assigned to a game.",
+    priority: "P2",
+    effort: "medium",
+    targetKind: "minor",
+    targetVersion: "",
+    tokenCostPct: 20,
+    prompt: "Extend player selection from an exact four-person game picker into a larger session pool with per-game foursome selection and simple rotation helpers.",
+    category: "Scoring"
   }
 ];
