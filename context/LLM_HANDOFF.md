@@ -121,12 +121,12 @@ with the title double-quoted.
   `APP_VERSION`.
 - Docs: `README.md` (public/run/build), this handoff (all dev + LLM context),
   `AGENTS.md` + `CLAUDE.md` (thin auto-loaded summaries).
-- Current version: `APP_VERSION = "1.0.0.7"` - active build line,
-  "Thumb Reach": Players uses one-line rows with games and W-L record, search
-  lives in a sticky bottom add/search bar, the title bar exposes JSON import and
-  export buttons, and JSON file imports ask for merge or overwrite. The prior
-  "Quick Switch" toolbar remains for Play, Rankings, Games, and Data, with Play
-  active through Players, Matchups, Score, and Game Saved.
+- Current version: `APP_VERSION = "1.0.0.8"` - active build line,
+  "Fast Picks": Players uses one-line rows with games and W-L record, search
+  clears after row selection, the search/add dock and Go button float at the
+  bottom with keyboard-aware positioning, and swipe-left on a player row
+  reveals rename. The title bar exposes JSON import/export, and JSON file
+  imports ask for merge or overwrite.
 - User data lives in browser localStorage. Export/import support uses text,
   CSV, and JSON backup flows. The app should continue to run over `file://`.
 - No backend, bundler, package manager, or runtime dependencies.
@@ -136,8 +136,8 @@ with the title double-quoted.
   concurrency group, stages a full `_site` artifact, preserves other published
   channel folders from the `gh-pages` snapshot branch, saves the refreshed
   snapshot back to `gh-pages`, then deploys with `actions/deploy-pages`.
-- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.7
-  "Thumb Reach".
+- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.8
+  "Fast Picks".
 
 ## Rules
 

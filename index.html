@@ -51,6 +51,8 @@
       --warn: #ffc857;
       --shadow: rgba(0, 0, 0, 0.35);
       --radius: 8px;
+      --keyboard-offset: 0px;
+      --player-dock-bottom: calc(var(--keyboard-offset) + max(10px, env(safe-area-inset-bottom)));
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
@@ -687,11 +689,66 @@
       gap: 6px;
     }
 
+    #view-players.view.active {
+      padding-bottom: calc(76px + var(--keyboard-offset));
+    }
+
+    #view-players .panel {
+      padding-bottom: 88px;
+    }
+
+    #view-players .selection-bar {
+      display: contents;
+    }
+
+    #view-players #playerOrderNote {
+      display: none;
+    }
+
+    #view-players #playersGo {
+      position: fixed;
+      right: max(10px, calc((100vw - 760px) / 2 + 10px));
+      bottom: var(--player-dock-bottom);
+      z-index: 16;
+      width: 56px;
+      min-width: 56px;
+      min-height: 48px;
+      box-shadow: 0 12px 28px var(--shadow);
+    }
+
+    .roster-row {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      touch-action: pan-y;
+    }
+
+    .roster-row-edit {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+      width: 68px;
+      min-width: 68px;
+      min-height: 100%;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: #06110b;
+      background: var(--accent);
+    }
+
+    :root[data-theme="light"] .roster-row-edit {
+      color: #ffffff;
+    }
+
     .player-chip {
+      position: relative;
+      z-index: 1;
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto auto;
       align-items: center;
       gap: 10px;
+      width: 100%;
       min-height: 42px;
       padding: 7px 10px;
       border: 1px solid var(--line);
@@ -700,6 +757,11 @@
       text-align: left;
       font-weight: 750;
       overflow: hidden;
+      transition: transform 150ms ease;
+    }
+
+    .roster-row.edit-open .player-chip {
+      transform: translateX(-68px);
     }
 
     .player-chip.selected {
@@ -734,15 +796,23 @@
     }
 
     .player-search-dock {
-      position: sticky;
-      bottom: max(8px, env(safe-area-inset-bottom));
-      z-index: 4;
+      position: fixed;
+      left: max(10px, calc((100vw - 760px) / 2 + 10px));
+      right: max(74px, calc((100vw - 760px) / 2 + 74px));
+      bottom: var(--player-dock-bottom);
+      z-index: 15;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) 48px;
       gap: 8px;
-      margin: 8px 0 0;
-      padding-top: 8px;
-      background: linear-gradient(180deg, transparent, var(--panel) 18px);
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+    .player-search-dock input,
+    .player-search-dock button {
+      min-height: 48px;
+      box-shadow: 0 12px 28px var(--shadow);
     }
 
     .matchup-list {
@@ -1387,10 +1457,10 @@
     .toast {
       position: fixed;
       left: 50%;
-      bottom: max(18px, env(safe-area-inset-bottom));
+      top: max(12px, env(safe-area-inset-top));
       z-index: 20;
       width: min(calc(100% - 24px), 420px);
-      transform: translate(-50%, 120%);
+      transform: translate(-50%, -130%);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: var(--panel);
@@ -1956,7 +2026,7 @@
     (function () {
       "use strict";
 
-      var APP_VERSION = "1.0.0.7";
+      var APP_VERSION = "1.0.0.8";
       var STORAGE_KEY = "pickle-score-state-v1";
       var INSTALL_ICON_KEY = "psInstallIconVariant";
       var DEFAULT_STATE = {
@@ -1984,6 +2054,8 @@
 
       var state = loadState();
       var toastTimer = null;
+      var rosterSwipe = null;
+      var suppressRosterClickUntil = 0;
 
       var els = {
         html: document.documentElement,
@@ -2064,6 +2136,7 @@
       function init() {
         normalizeState();
         bindEvents();
+        bindViewportDock();
         renderStaticButtonIcons();
         applyTheme();
         syncScoreFromQuick();
@@ -2238,9 +2311,33 @@
 
         els.playerSearch.addEventListener("input", renderRoster);
 
+        els.rosterGrid.addEventListener("pointerdown", startRosterSwipe);
+        els.rosterGrid.addEventListener("pointermove", moveRosterSwipe);
+        els.rosterGrid.addEventListener("pointerup", endRosterSwipe);
+        els.rosterGrid.addEventListener("pointercancel", cancelRosterSwipe);
+
         els.rosterGrid.addEventListener("click", function (event) {
+          var edit = event.target.closest("[data-edit-roster-player]");
+          if (edit) {
+            closeRosterEdits();
+            renamePlayer(edit.dataset.editRosterPlayer);
+            return;
+          }
+          if (Date.now() < suppressRosterClickUntil) {
+            event.preventDefault();
+            return;
+          }
           var chip = event.target.closest("[data-player]");
           if (chip) {
+            var row = chip.closest(".roster-row");
+            if (row && row.classList.contains("edit-open")) {
+              closeRosterEdits();
+              return;
+            }
+            var selected = selectedPlayerIds();
+            if (selected.indexOf(chip.dataset.player) >= 0 || selected.length < 4) {
+              els.playerSearch.value = "";
+            }
             togglePlayerInDraft(chip.dataset.player);
           }
         });
@@ -2356,6 +2453,88 @@
           return;
         }
         dialog.removeAttribute("open");
+      }
+
+      function bindViewportDock() {
+        syncKeyboardOffset();
+        window.addEventListener("resize", syncKeyboardOffset);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener("resize", syncKeyboardOffset);
+          window.visualViewport.addEventListener("scroll", syncKeyboardOffset);
+        }
+      }
+
+      function syncKeyboardOffset() {
+        var offset = 0;
+        if (window.visualViewport) {
+          offset = Math.max(0, window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop);
+        }
+        els.html.style.setProperty("--keyboard-offset", Math.round(offset) + "px");
+      }
+
+      function startRosterSwipe(event) {
+        var chip = event.target.closest("[data-player]");
+        if (!chip) {
+          return;
+        }
+        rosterSwipe = {
+          row: chip.closest(".roster-row"),
+          startX: event.clientX,
+          startY: event.clientY,
+          moved: false
+        };
+      }
+
+      function moveRosterSwipe(event) {
+        if (!rosterSwipe || !rosterSwipe.row) {
+          return;
+        }
+        var dx = event.clientX - rosterSwipe.startX;
+        var dy = event.clientY - rosterSwipe.startY;
+        if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+          rosterSwipe.moved = true;
+          event.preventDefault();
+        }
+      }
+
+      function endRosterSwipe(event) {
+        if (!rosterSwipe || !rosterSwipe.row) {
+          rosterSwipe = null;
+          return;
+        }
+        var dx = event.clientX - rosterSwipe.startX;
+        var dy = event.clientY - rosterSwipe.startY;
+        var row = rosterSwipe.row;
+        var moved = rosterSwipe.moved || (Math.abs(dx) > 18 && Math.abs(dx) > Math.abs(dy));
+        rosterSwipe = null;
+        if (!moved) {
+          return;
+        }
+        suppressRosterClickUntil = Date.now() + 350;
+        if (dx < -42) {
+          openRosterEdit(row);
+        } else if (dx > 34) {
+          closeRosterEdits();
+        }
+      }
+
+      function cancelRosterSwipe() {
+        rosterSwipe = null;
+      }
+
+      function openRosterEdit(row) {
+        closeRosterEdits(row);
+        if (row) {
+          row.classList.add("edit-open");
+        }
+      }
+
+      function closeRosterEdits(except) {
+        Array.prototype.forEach.call(els.rosterGrid.querySelectorAll(".roster-row.edit-open"), function (row) {
+          if (row !== except) {
+            row.classList.remove("edit-open");
+          }
+        });
       }
 
       function updateTheme(theme) {
@@ -3315,13 +3494,18 @@
           var count = counts[player.id] || 0;
           var stat = statByPlayer[player.id] || { wins: 0, losses: 0 };
           return (
-            "<button type=\"button\" class=\"player-chip " +
-            (selected[player.id] ? "selected " : "") +
-            "\" data-player=\"" + esc(player.id) + "\" aria-pressed=\"" + (selected[player.id] ? "true" : "false") + "\">" +
-              "<span class=\"player-chip-name\">" + esc(player.name) + "</span>" +
-              "<span class=\"player-chip-meta\">" + count + " game" + (count === 1 ? "" : "s") + "</span>" +
-              "<span class=\"player-chip-record\">" + stat.wins + "-" + stat.losses + "</span>" +
-            "</button>"
+            "<div class=\"roster-row\" data-player-row=\"" + esc(player.id) + "\">" +
+              "<button type=\"button\" class=\"roster-row-edit icon-button\" data-edit-roster-player=\"" + esc(player.id) + "\" aria-label=\"Rename " + esc(player.name) + "\" title=\"Rename " + esc(player.name) + "\">" +
+                iconContent("edit", "Rename " + player.name) +
+              "</button>" +
+              "<button type=\"button\" class=\"player-chip " +
+              (selected[player.id] ? "selected " : "") +
+              "\" data-player=\"" + esc(player.id) + "\" aria-pressed=\"" + (selected[player.id] ? "true" : "false") + "\">" +
+                "<span class=\"player-chip-name\">" + esc(player.name) + "</span>" +
+                "<span class=\"player-chip-meta\">" + count + " game" + (count === 1 ? "" : "s") + "</span>" +
+                "<span class=\"player-chip-record\">" + stat.wins + "-" + stat.losses + "</span>" +
+              "</button>" +
+            "</div>"
           );
         }).join("");
       }
