@@ -1399,7 +1399,7 @@
 
     :root[data-view="score"] .app {
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: auto auto minmax(0, 1fr);
       min-height: 100dvh;
       overflow: hidden;
       padding-bottom: max(8px, env(safe-area-inset-bottom));
@@ -1422,6 +1422,21 @@
 
     :root[data-view="score"] .mini-stats {
       display: none;
+    }
+
+    :root[data-view="score"] .tabs {
+      position: static;
+      margin: 0 0 6px;
+      padding: 0;
+    }
+
+    :root[data-view="score"] .tab.icon-button {
+      min-height: 32px;
+    }
+
+    :root[data-view="score"] .tab.icon-button .sf-symbol {
+      width: 17px;
+      height: 17px;
     }
 
     :root[data-view="score"] #view-score.view.active {
@@ -1628,6 +1643,13 @@
         <button id="settingsBtn" type="button">Settings</button>
       </div>
     </header>
+
+    <nav class="tabs" aria-label="Screens">
+      <button class="tab active" type="button" data-view="players" data-view-group="players matchups score next">Play</button>
+      <button class="tab" type="button" data-view="rank" data-view-group="rank">Rank</button>
+      <button class="tab" type="button" data-view="games" data-view-group="games">Games</button>
+      <button class="tab" type="button" data-view="data" data-view-group="data">Data</button>
+    </nav>
 
     <section class="view active" id="view-players" aria-labelledby="playersTitle">
       <div class="panel">
@@ -1918,7 +1940,7 @@
     (function () {
       "use strict";
 
-      var APP_VERSION = "1.0.0.5";
+      var APP_VERSION = "1.0.0.6";
       var STORAGE_KEY = "pickle-score-state-v1";
       var INSTALL_ICON_KEY = "psInstallIconVariant";
       var DEFAULT_STATE = {
@@ -2270,7 +2292,10 @@
       function showView(viewName) {
         els.html.dataset.view = viewName;
         els.tabs.forEach(function (tab) {
-          tab.classList.toggle("active", tab.dataset.view === viewName);
+          var groupedViews = (tab.dataset.viewGroup || tab.dataset.view || "").split(/\s+/);
+          var isActive = groupedViews.indexOf(viewName) >= 0;
+          tab.classList.toggle("active", isActive);
+          tab.setAttribute("aria-pressed", isActive);
         });
         els.views.forEach(function (view) {
           view.classList.toggle("active", view.id === "view-" + viewName);
@@ -2455,6 +2480,16 @@
       }
 
       function renderStaticButtonIcons() {
+        var tabIcons = {
+          players: ["play", "Play"],
+          rank: ["trophy", "Rankings"],
+          games: ["list", "Games"],
+          data: ["data", "Data"]
+        };
+        els.tabs.forEach(function (tab) {
+          var setup = tabIcons[tab.dataset.view] || ["eye", "Screen"];
+          setIconButton(tab, setup[0], setup[1]);
+        });
         setIconButton(els.settingsBtn, "settings", "Settings");
         setIconButton(els.playersGo, "play", "Go");
         setIconButton(els.matchupsBack, "arrowCounterclockwise", "Back to players");
