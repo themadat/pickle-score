@@ -1,0 +1,3 @@
+# Keep accidental repo-wide ripgrep searches from dumping generated or bulky
+# art/build outputs into LLM context. Explicit paths still work when needed.
+assets/icons/*.png

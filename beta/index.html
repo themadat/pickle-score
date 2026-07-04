@@ -1,0 +1,2843 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pickle Score</title>
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <script>
+    (function () {
+      var variant = "light";
+      try {
+        if (localStorage.getItem("psInstallIconVariant") === "dark") variant = "dark";
+      } catch (error) { }
+      var dark = variant === "dark";
+      function add(rel, href, attrs) {
+        var link = document.createElement("link");
+        link.rel = rel;
+        link.href = href;
+        for (var key in attrs || {}) {
+          link.setAttribute(key, attrs[key]);
+        }
+        link.dataset.installIcon = "true";
+        document.head.appendChild(link);
+      }
+      add("apple-touch-icon", dark ? "assets/icons/apple-touch-icon-dark.png" : "assets/icons/apple-touch-icon.png");
+      add("manifest", dark ? "manifest-dark.webmanifest" : "manifest.webmanifest");
+      add("icon", dark ? "assets/icons/favicon-32-dark.png" : "assets/icons/favicon-32.png", { sizes: "32x32", type: "image/png" });
+      add("icon", dark ? "assets/icons/favicon-16-dark.png" : "assets/icons/favicon-16.png", { sizes: "16x16", type: "image/png" });
+    }());
+  </script>
+  <meta name="apple-mobile-web-app-title" content="Pickle Score">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f3f6f8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b1016" media="(prefers-color-scheme: dark)">
+  <meta name="description" content="Pickle Score is a local-first pickleball scorekeeper.">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1016;
+      --panel: #121922;
+      --panel-2: #17212c;
+      --line: #273443;
+      --line-strong: #3b4d60;
+      --text: #f3f7fb;
+      --muted: #aab7c5;
+      --quiet: #748294;
+      --accent: #28d17c;
+      --accent-2: #54b6ff;
+      --danger: #ff6b6b;
+      --warn: #ffc857;
+      --shadow: rgba(0, 0, 0, 0.35);
+      --radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f3f6f8;
+      --panel: #ffffff;
+      --panel-2: #e9eef2;
+      --line: #d1dbe3;
+      --line-strong: #a9b8c5;
+      --text: #111922;
+      --muted: #465565;
+      --quiet: #6b7b8b;
+      --accent: #047a45;
+      --accent-2: #006bb3;
+      --danger: #b7192b;
+      --warn: #925f00;
+      --shadow: rgba(26, 38, 52, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background:
+        linear-gradient(180deg, rgba(40, 209, 124, 0.08), transparent 220px),
+        var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      letter-spacing: 0;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+      letter-spacing: 0;
+    }
+
+    button {
+      border: 0;
+      min-height: 44px;
+      border-radius: var(--radius);
+      color: var(--text);
+      background: var(--panel-2);
+      touch-action: manipulation;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--text);
+      padding: 12px;
+      outline: none;
+    }
+
+    input:focus,
+    textarea:focus,
+    button:focus-visible {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(84, 182, 255, 0.22);
+      outline: none;
+    }
+
+    textarea {
+      min-height: 180px;
+      resize: vertical;
+      line-height: 1.35;
+    }
+
+    .app {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      padding: max(14px, env(safe-area-inset-top)) 12px max(20px, env(safe-area-inset-bottom));
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 4px 0 12px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      line-height: 1.05;
+      font-weight: 800;
+    }
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 750;
+    }
+
+    h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .app-icon {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 auto;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px var(--shadow);
+    }
+
+    .brand-copy {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .mini-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .version-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      color: var(--accent);
+      background: var(--panel);
+      font-size: 0.72rem;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+
+    .top-actions button,
+    .theme-toggle {
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin: 0 -2px 12px;
+      padding: 6px 2px;
+      background: var(--bg);
+      backdrop-filter: blur(18px);
+    }
+
+    .tab {
+      min-height: 42px;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid transparent;
+      font-weight: 700;
+    }
+
+    .tab.active {
+      color: var(--text);
+      background: var(--panel);
+      border-color: var(--line);
+      box-shadow: 0 6px 18px var(--shadow);
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: 0 14px 30px var(--shadow);
+      padding: 12px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .segmented {
+      display: grid;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+
+    .segmented.two {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .segmented.three {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .segmented button {
+      min-height: 38px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 750;
+    }
+
+    .segmented button.active {
+      color: #06110b;
+      background: var(--accent);
+    }
+
+    :root[data-theme="light"] .segmented button.active {
+      color: #ffffff;
+    }
+
+    .team-board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .team {
+      display: grid;
+      gap: 9px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 10px;
+    }
+
+    .team.is-winner {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .team-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 28px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .score-badge {
+      min-width: 36px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      color: var(--text);
+      background: var(--panel-2);
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    .team.is-winner .score-badge {
+      color: #06110b;
+      background: var(--accent);
+    }
+
+    .slots {
+      display: grid;
+      gap: 7px;
+    }
+
+    .slot {
+      min-height: 48px;
+      padding: 8px;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      color: var(--muted);
+      text-align: left;
+      font-weight: 750;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .slot.filled {
+      border-style: solid;
+      color: var(--text);
+      border-color: var(--accent-2);
+      background: var(--panel-2);
+    }
+
+    .slot.focused {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(84, 182, 255, 0.22);
+    }
+
+    .winner-button {
+      min-height: 40px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: transparent;
+      font-weight: 800;
+    }
+
+    .winner-button.active {
+      color: #06110b;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    :root[data-theme="light"] .winner-button.active {
+      color: #ffffff;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .actions button {
+      min-height: 40px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      font-weight: 750;
+    }
+
+    .score-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: 56px 1fr 56px 56px 1fr 56px;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .score-grid button {
+      min-height: 48px;
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      font-size: 1.15rem;
+      font-weight: 850;
+    }
+
+    .score-number {
+      display: grid;
+      min-height: 58px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      font-size: 2rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .loser-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 7px;
+    }
+
+    .loser-grid button {
+      min-height: 42px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      font-weight: 800;
+    }
+
+    .loser-grid button.active {
+      color: #06110b;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    :root[data-theme="light"] .loser-grid button.active {
+      color: #ffffff;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .row > * {
+      min-width: 0;
+    }
+
+    .row input {
+      flex: 1;
+    }
+
+    .row button {
+      flex: 0 0 auto;
+      padding: 0 14px;
+      font-weight: 800;
+    }
+
+    .save-button {
+      width: 100%;
+      min-height: 56px;
+      color: #06110b;
+      background: var(--accent);
+      font-size: 1rem;
+      font-weight: 900;
+    }
+
+    :root[data-theme="light"] .save-button {
+      color: #ffffff;
+    }
+
+    .save-button.warning {
+      color: var(--text);
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+    }
+
+    .roster-tools {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .roster-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+      gap: 8px;
+    }
+
+    .player-chip {
+      min-height: 44px;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      text-align: left;
+      font-weight: 750;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .player-chip.selected {
+      border-color: var(--accent);
+      background: var(--panel-2);
+    }
+
+    .player-chip.hidden {
+      display: none;
+    }
+
+    .empty {
+      padding: 14px;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .game-row,
+    .player-row,
+    .ranking-row,
+    .pair-row {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 10px;
+    }
+
+    .game-row {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+
+    .game-main,
+    .rank-main,
+    .pair-main {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .game-title,
+    .rank-title,
+    .pair-title {
+      overflow: hidden;
+      color: var(--text);
+      font-weight: 800;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .game-meta,
+    .rank-meta,
+    .pair-meta {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .game-score,
+    .rank-score {
+      justify-self: end;
+      min-width: 54px;
+      border-radius: 999px;
+      padding: 6px 8px;
+      color: var(--text);
+      background: var(--panel-2);
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .delete-button {
+      min-width: 44px;
+      min-height: 36px;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      background: transparent;
+      font-weight: 900;
+    }
+
+    .ranking-row {
+      grid-template-columns: 34px 1fr auto;
+      align-items: center;
+    }
+
+    .rank-number {
+      display: grid;
+      min-width: 30px;
+      min-height: 30px;
+      place-items: center;
+      border-radius: 999px;
+      color: var(--bg);
+      background: var(--accent-2);
+      font-weight: 900;
+    }
+
+    .stat-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 10px;
+    }
+
+    .stat-value {
+      display: block;
+      color: var(--text);
+      font-size: 1.25rem;
+      font-weight: 900;
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .player-row {
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+    }
+
+    .player-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 800;
+    }
+
+    .player-row button {
+      min-height: 36px;
+      padding: 0 10px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: transparent;
+      font-weight: 750;
+    }
+
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .tools button {
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      font-weight: 800;
+    }
+
+    .tools .primary {
+      color: #06110b;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    :root[data-theme="light"] .tools .primary {
+      color: #ffffff;
+    }
+
+    .import-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    dialog {
+      width: min(calc(100% - 24px), 620px);
+      max-height: min(86dvh, 760px);
+      margin: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48);
+      padding: 0;
+    }
+
+    dialog::backdrop {
+      background: rgba(4, 8, 12, 0.62);
+      backdrop-filter: blur(8px);
+    }
+
+    dialog header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+      padding: 12px;
+    }
+
+    .dialog-close {
+      min-height: 36px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .dialog-body {
+      display: grid;
+      gap: 12px;
+      max-height: calc(min(86dvh, 760px) - 114px);
+      overflow: auto;
+      padding: 12px;
+    }
+
+    .dialog-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .settings-section,
+    .install-guide-card,
+    .install-device-details {
+      display: grid;
+      gap: 9px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 10px;
+    }
+
+    .setting-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+    }
+
+    .setting-label {
+      display: grid;
+      gap: 2px;
+      color: var(--text);
+      font-weight: 850;
+    }
+
+    .setting-label small {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 650;
+      line-height: 1.25;
+    }
+
+    .settings-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .settings-actions button {
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .theme-choice {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(74px, 1fr));
+      gap: 5px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+    }
+
+    .theme-choice button {
+      min-height: 34px;
+      padding: 0 10px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 850;
+    }
+
+    .theme-choice button.active {
+      background: var(--accent);
+      color: #06110b;
+    }
+
+    :root[data-theme="light"] .theme-choice button.active {
+      color: #ffffff;
+    }
+
+    .install-top {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .install-device-icon {
+      display: grid;
+      width: 54px;
+      height: 54px;
+      min-height: 54px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    .install-kicker {
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .install-intro,
+    .install-mini-note,
+    .install-foot {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.35;
+    }
+
+    .install-icon-picker {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+    }
+
+    .install-section-label {
+      padding: 0 4px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .install-icon-option {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .install-icon-option:has(input:checked) {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .install-icon-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .install-icon-thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background-position: center;
+      background-size: cover;
+      box-shadow: 0 8px 18px var(--shadow);
+    }
+
+    .install-icon-thumb-light {
+      background-image: url("assets/icons/apple-touch-icon.png");
+    }
+
+    .install-icon-thumb-dark {
+      background-image: url("assets/icons/apple-touch-icon-dark.png");
+    }
+
+    .install-icon-copy {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .install-icon-label {
+      color: var(--text);
+      font-weight: 900;
+    }
+
+    .install-icon-caption {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.25;
+    }
+
+    .install-directions-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .install-guide-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .install-guide-title {
+      display: grid;
+      gap: 2px;
+    }
+
+    .install-guide-title span {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .install-steps {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding-left: 1.2rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .install-other-guides {
+      display: grid;
+      gap: 8px;
+    }
+
+    .install-other-heading {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .install-device-details summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      font-weight: 850;
+    }
+
+    .install-device-details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(18px, env(safe-area-inset-bottom));
+      z-index: 20;
+      width: min(calc(100% - 24px), 420px);
+      transform: translate(-50%, 120%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: 0 16px 40px var(--shadow);
+      padding: 12px 14px;
+      text-align: center;
+      font-weight: 800;
+      transition: transform 160ms ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translate(-50%, 0);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .danger {
+      color: var(--danger);
+    }
+
+    @media (max-width: 430px) {
+      .app {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .tabs {
+        gap: 3px;
+      }
+
+      .tab {
+        font-size: 0.88rem;
+      }
+
+      .score-grid {
+        grid-template-columns: 46px 1fr 46px 46px 1fr 46px;
+        gap: 5px;
+      }
+
+      .score-grid button {
+        font-size: 1rem;
+      }
+
+      .score-number {
+        min-height: 54px;
+        font-size: 1.8rem;
+      }
+
+      .loser-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .actions {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .top-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .top-actions button {
+        padding: 0 8px;
+      }
+
+      .setting-row,
+      .install-top {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img id="appIcon" class="app-icon" src="assets/icons/icon-192-dark.png" alt="" aria-hidden="true">
+        <div class="brand-copy">
+          <div class="brand-title">
+            <h1>Pickle Score</h1>
+            <span class="version-pill" id="versionLabel">v1.0.0</span>
+          </div>
+          <div class="mini-stats" id="miniStats"></div>
+        </div>
+      </div>
+      <div class="top-actions" aria-label="App actions">
+        <button class="theme-toggle" id="themeToggle" type="button">Light</button>
+        <button id="addToHomeBtn" type="button">Add as App</button>
+        <button id="settingsBtn" type="button">Settings</button>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Main views">
+      <button class="tab active" type="button" data-view="record">Record</button>
+      <button class="tab" type="button" data-view="rank">Rank</button>
+      <button class="tab" type="button" data-view="games">Games</button>
+      <button class="tab" type="button" data-view="data">Data</button>
+    </nav>
+
+    <section class="view active" id="view-record" aria-labelledby="recordTitle">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 id="recordTitle">New Game</h2>
+          <div class="segmented two" role="group" aria-label="Game type">
+            <button type="button" data-mode="doubles" class="active">Doubles</button>
+            <button type="button" data-mode="singles">Singles</button>
+          </div>
+        </div>
+        <div class="team-board" id="teamBoard"></div>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="clearDraft">Clear</button>
+        <button type="button" id="swapTeams">Swap</button>
+        <button type="button" id="rematch">Rematch</button>
+      </div>
+
+      <div class="panel score-panel">
+        <div class="panel-header">
+          <h2>Score</h2>
+          <div class="segmented three" role="group" aria-label="Winning score">
+            <button type="button" data-win-score="11" class="active">11</button>
+            <button type="button" data-win-score="15">15</button>
+            <button type="button" data-win-score="21">21</button>
+          </div>
+        </div>
+        <div class="score-grid" aria-label="Manual score controls">
+          <button type="button" data-score-step="A:-1" aria-label="Team A minus one">-</button>
+          <div class="score-number" id="scoreA">11</div>
+          <button type="button" data-score-step="A:1" aria-label="Team A plus one">+</button>
+          <button type="button" data-score-step="B:-1" aria-label="Team B minus one">-</button>
+          <div class="score-number" id="scoreB">9</div>
+          <button type="button" data-score-step="B:1" aria-label="Team B plus one">+</button>
+        </div>
+        <div>
+          <h3>Loser Score</h3>
+          <div class="loser-grid" id="loserGrid"></div>
+        </div>
+        <button class="save-button" id="saveGame" type="button">Save Game</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Players</h2>
+          <span class="muted" id="nextSlot"></span>
+        </div>
+        <form class="roster-tools" id="quickAddForm">
+          <input id="quickAddName" autocomplete="off" placeholder="Add player" aria-label="Add player">
+          <button type="submit">Add</button>
+        </form>
+        <input id="playerSearch" autocomplete="off" placeholder="Search players" aria-label="Search players">
+        <div class="roster-grid" id="rosterGrid"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-rank" aria-labelledby="rankTitle">
+      <div class="stat-strip" id="statStrip"></div>
+      <div class="panel">
+        <div class="panel-header">
+          <h2 id="rankTitle">Player Ranking</h2>
+          <span class="muted" id="rankingCount"></span>
+        </div>
+        <div class="list" id="rankingList"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Best Pairs</h2>
+          <span class="muted" id="pairCount"></span>
+        </div>
+        <div class="list" id="pairList"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-games" aria-labelledby="gamesTitle">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 id="gamesTitle">Games</h2>
+          <button type="button" class="delete-button" id="undoLast" aria-label="Delete last game">Undo</button>
+        </div>
+        <div class="list" id="gameList"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-data" aria-labelledby="dataTitle">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 id="dataTitle">Roster</h2>
+          <span class="muted" id="rosterCount"></span>
+        </div>
+        <div class="import-grid">
+          <textarea id="bulkPlayers" placeholder="Paste names, one per line or comma separated" aria-label="Bulk player import"></textarea>
+          <div class="tools">
+            <button type="button" id="importPlayers" class="primary">Add Names</button>
+            <button type="button" id="clearInactive">Clear Hidden</button>
+          </div>
+        </div>
+        <div class="list" id="playerManageList"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Export</h2>
+          <span class="muted" id="exportSize"></span>
+        </div>
+        <textarea id="exportText" readonly aria-label="Export text"></textarea>
+        <div class="tools">
+          <button type="button" id="shareText" class="primary">Share</button>
+          <button type="button" id="copyText">Copy</button>
+          <button type="button" id="downloadText">TXT</button>
+          <button type="button" id="downloadCsv">CSV</button>
+          <button type="button" id="downloadJson">JSON</button>
+          <button type="button" id="selectExport">Select</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Import Backup</h2>
+        </div>
+        <textarea id="backupJson" placeholder="Paste JSON backup" aria-label="Import JSON backup"></textarea>
+        <div class="tools">
+          <button type="button" id="restoreBackup" class="primary">Restore</button>
+          <button type="button" id="wipeData" class="danger">Wipe</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="addToHomeDialog">
+    <header>
+      <h2>Add Pickle Score as an App</h2>
+      <button class="dialog-close" type="button" data-close-dialog="addToHomeDialog">Close</button>
+    </header>
+    <div class="dialog-body">
+      <section class="install-top" aria-live="polite">
+        <div id="installDeviceIcon" class="install-device-icon" aria-hidden="true">App</div>
+        <div>
+          <p class="install-kicker">Detected: <span id="installDetectedDevice">Device</span></p>
+          <p class="install-intro">Pick an icon, then follow the directions for this device.</p>
+        </div>
+      </section>
+
+      <fieldset class="install-icon-picker">
+        <legend class="install-section-label">Choose your icon</legend>
+        <label class="install-icon-option">
+          <input type="radio" name="installIconVariant" value="light">
+          <span class="install-icon-thumb install-icon-thumb-light" aria-hidden="true"></span>
+          <span class="install-icon-copy">
+            <span class="install-icon-label">Light</span>
+            <span class="install-icon-caption">Bright court icon for light system themes.</span>
+          </span>
+        </label>
+        <label class="install-icon-option">
+          <input type="radio" name="installIconVariant" value="dark">
+          <span class="install-icon-thumb install-icon-thumb-dark" aria-hidden="true"></span>
+          <span class="install-icon-copy">
+            <span class="install-icon-label">Dark</span>
+            <span class="install-icon-caption">High-contrast icon for dark system themes.</span>
+          </span>
+        </label>
+      </fieldset>
+
+      <div class="install-directions-grid">
+        <section id="installPrimaryGuide" class="install-guide-card"></section>
+        <div id="installOtherGuides" class="install-other-guides"></div>
+      </div>
+
+      <p class="install-foot">If the old icon sticks around, reload the page before adding it again.</p>
+    </div>
+  </dialog>
+
+  <dialog id="settingsDialog">
+    <header>
+      <h2>Settings</h2>
+      <button class="dialog-close" type="button" data-close-dialog="settingsDialog">Close</button>
+    </header>
+    <div class="dialog-body">
+      <section class="settings-section">
+        <h3>Appearance</h3>
+        <div class="setting-row">
+          <div class="setting-label">
+            Theme
+            <small>Switch the scorekeeper between light and dark.</small>
+          </div>
+          <div class="theme-choice" role="group" aria-label="Theme">
+            <button id="settingsLightBtn" type="button">Light</button>
+            <button id="settingsDarkBtn" type="button">Dark</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Install</h3>
+        <div class="setting-row">
+          <div class="setting-label">
+            Add as App
+            <small>Open device-matched install directions and icon choice.</small>
+          </div>
+          <div class="settings-actions">
+            <button id="settingsInstallBtn" type="button">Open</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Data</h3>
+        <div class="setting-row">
+          <div class="setting-label">
+            Export and backup
+            <small>Use the Data tab for roster management, exports, import, and wipe.</small>
+          </div>
+          <div class="settings-actions">
+            <button id="settingsDataBtn" type="button">Data Tab</button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <footer class="dialog-footer">
+      <b>Pickle Score</b>
+      <span class="version-pill" id="settingsVersionLabel">v1.0.0</span>
+    </footer>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/js/changelog.js"></script>
+  <script src="assets/js/roadmap.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      var APP_VERSION = "1.0.0.1";
+      var STORAGE_KEY = "pickle-score-state-v1";
+      var INSTALL_ICON_KEY = "psInstallIconVariant";
+      var DEFAULT_STATE = {
+        appVersion: APP_VERSION,
+        players: [],
+        games: [],
+        lastTeams: null,
+        settings: {
+          theme: "dark"
+        },
+        draft: {
+          mode: "doubles",
+          teamA: [],
+          teamB: [],
+          focus: null,
+          winner: "A",
+          winScore: 11,
+          loserScore: 9,
+          scoreA: 11,
+          scoreB: 9
+        }
+      };
+
+      var state = loadState();
+      var toastTimer = null;
+
+      var els = {
+        html: document.documentElement,
+        appIcon: document.getElementById("appIcon"),
+        miniStats: document.getElementById("miniStats"),
+        versionLabel: document.getElementById("versionLabel"),
+        settingsVersionLabel: document.getElementById("settingsVersionLabel"),
+        themeToggle: document.getElementById("themeToggle"),
+        addToHomeBtn: document.getElementById("addToHomeBtn"),
+        settingsBtn: document.getElementById("settingsBtn"),
+        addToHomeDialog: document.getElementById("addToHomeDialog"),
+        settingsDialog: document.getElementById("settingsDialog"),
+        installDetectedDevice: document.getElementById("installDetectedDevice"),
+        installDeviceIcon: document.getElementById("installDeviceIcon"),
+        installPrimaryGuide: document.getElementById("installPrimaryGuide"),
+        installOtherGuides: document.getElementById("installOtherGuides"),
+        settingsLightBtn: document.getElementById("settingsLightBtn"),
+        settingsDarkBtn: document.getElementById("settingsDarkBtn"),
+        settingsInstallBtn: document.getElementById("settingsInstallBtn"),
+        settingsDataBtn: document.getElementById("settingsDataBtn"),
+        tabs: Array.prototype.slice.call(document.querySelectorAll(".tab")),
+        views: Array.prototype.slice.call(document.querySelectorAll(".view")),
+        teamBoard: document.getElementById("teamBoard"),
+        clearDraft: document.getElementById("clearDraft"),
+        swapTeams: document.getElementById("swapTeams"),
+        rematch: document.getElementById("rematch"),
+        scoreA: document.getElementById("scoreA"),
+        scoreB: document.getElementById("scoreB"),
+        loserGrid: document.getElementById("loserGrid"),
+        saveGame: document.getElementById("saveGame"),
+        quickAddForm: document.getElementById("quickAddForm"),
+        quickAddName: document.getElementById("quickAddName"),
+        playerSearch: document.getElementById("playerSearch"),
+        rosterGrid: document.getElementById("rosterGrid"),
+        nextSlot: document.getElementById("nextSlot"),
+        statStrip: document.getElementById("statStrip"),
+        rankingCount: document.getElementById("rankingCount"),
+        rankingList: document.getElementById("rankingList"),
+        pairCount: document.getElementById("pairCount"),
+        pairList: document.getElementById("pairList"),
+        undoLast: document.getElementById("undoLast"),
+        gameList: document.getElementById("gameList"),
+        rosterCount: document.getElementById("rosterCount"),
+        bulkPlayers: document.getElementById("bulkPlayers"),
+        importPlayers: document.getElementById("importPlayers"),
+        clearInactive: document.getElementById("clearInactive"),
+        playerManageList: document.getElementById("playerManageList"),
+        exportText: document.getElementById("exportText"),
+        exportSize: document.getElementById("exportSize"),
+        shareText: document.getElementById("shareText"),
+        copyText: document.getElementById("copyText"),
+        downloadText: document.getElementById("downloadText"),
+        downloadCsv: document.getElementById("downloadCsv"),
+        downloadJson: document.getElementById("downloadJson"),
+        selectExport: document.getElementById("selectExport"),
+        backupJson: document.getElementById("backupJson"),
+        restoreBackup: document.getElementById("restoreBackup"),
+        wipeData: document.getElementById("wipeData"),
+        toast: document.getElementById("toast")
+      };
+
+      init();
+
+      function init() {
+        normalizeState();
+        bindEvents();
+        applyTheme();
+        syncScoreFromQuick();
+        renderAll();
+      }
+
+      function bindEvents() {
+        els.tabs.forEach(function (tab) {
+          tab.addEventListener("click", function () {
+            showView(tab.dataset.view);
+          });
+        });
+
+        els.themeToggle.addEventListener("click", function () {
+          state.settings.theme = state.settings.theme === "dark" ? "light" : "dark";
+          saveAndRender();
+        });
+
+        els.addToHomeBtn.addEventListener("click", openInstallDialog);
+        els.settingsBtn.addEventListener("click", openSettingsDialog);
+        els.settingsInstallBtn.addEventListener("click", function () {
+          closeDialog(els.settingsDialog);
+          openInstallDialog();
+        });
+        els.settingsDataBtn.addEventListener("click", function () {
+          closeDialog(els.settingsDialog);
+          showView("data");
+        });
+        els.settingsLightBtn.addEventListener("click", function () {
+          updateTheme("light");
+        });
+        els.settingsDarkBtn.addEventListener("click", function () {
+          updateTheme("dark");
+        });
+
+        document.querySelectorAll("[data-close-dialog]").forEach(function (button) {
+          button.addEventListener("click", function () {
+            closeDialog(document.getElementById(button.dataset.closeDialog));
+          });
+        });
+
+        document.querySelectorAll('input[name="installIconVariant"]').forEach(function (radio) {
+          radio.addEventListener("change", function () {
+            if (radio.checked) {
+              setInstallIconVariant(radio.value, true);
+              showToast("Icon set");
+            }
+          });
+        });
+
+        [els.addToHomeDialog, els.settingsDialog].forEach(function (dialog) {
+          dialog.addEventListener("click", function (event) {
+            if (event.target === dialog) {
+              closeDialog(dialog);
+            }
+          });
+        });
+
+        document.querySelectorAll("[data-mode]").forEach(function (button) {
+          button.addEventListener("click", function () {
+            setMode(button.dataset.mode);
+          });
+        });
+
+        document.querySelectorAll("[data-win-score]").forEach(function (button) {
+          button.addEventListener("click", function () {
+            state.draft.winScore = Number(button.dataset.winScore);
+            state.draft.loserScore = Math.min(state.draft.loserScore, state.draft.winScore - 1);
+            syncScoreFromQuick();
+            saveAndRender();
+          });
+        });
+
+        els.teamBoard.addEventListener("click", function (event) {
+          var slot = event.target.closest("[data-slot]");
+          var winner = event.target.closest("[data-winner]");
+          if (slot) {
+            handleSlotClick(slot.dataset.team, Number(slot.dataset.index));
+          }
+          if (winner) {
+            state.draft.winner = winner.dataset.winner;
+            syncScoreFromQuick();
+            saveAndRender();
+          }
+        });
+
+        els.clearDraft.addEventListener("click", function () {
+          clearDraftTeams();
+          showToast("Cleared");
+        });
+
+        els.swapTeams.addEventListener("click", function () {
+          var oldA = state.draft.teamA;
+          state.draft.teamA = state.draft.teamB;
+          state.draft.teamB = oldA;
+          var oldScore = state.draft.scoreA;
+          state.draft.scoreA = state.draft.scoreB;
+          state.draft.scoreB = oldScore;
+          state.draft.winner = state.draft.winner === "A" ? "B" : "A";
+          saveAndRender();
+        });
+
+        els.rematch.addEventListener("click", function () {
+          loadRematch();
+        });
+
+        document.addEventListener("click", function (event) {
+          var step = event.target.closest("[data-score-step]");
+          var loser = event.target.closest("[data-loser-score]");
+          if (step) {
+            adjustScore(step.dataset.scoreStep);
+          }
+          if (loser) {
+            state.draft.loserScore = Number(loser.dataset.loserScore);
+            syncScoreFromQuick();
+            saveAndRender();
+          }
+        });
+
+        els.saveGame.addEventListener("click", saveGame);
+
+        els.quickAddForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          var name = els.quickAddName.value.trim();
+          if (name) {
+            addPlayersFromText(name);
+            els.quickAddName.value = "";
+            saveAndRender();
+            showToast("Player added");
+          }
+        });
+
+        els.playerSearch.addEventListener("input", renderRoster);
+
+        els.rosterGrid.addEventListener("click", function (event) {
+          var chip = event.target.closest("[data-player]");
+          if (chip) {
+            togglePlayerInDraft(chip.dataset.player);
+          }
+        });
+
+        els.importPlayers.addEventListener("click", function () {
+          var count = addPlayersFromText(els.bulkPlayers.value);
+          els.bulkPlayers.value = "";
+          saveAndRender();
+          showToast(count ? "Names added" : "No new names");
+        });
+
+        els.clearInactive.addEventListener("click", function () {
+          var used = usedPlayerIds();
+          state.players = state.players.filter(function (player) {
+            return player.active || used.has(player.id);
+          });
+          saveAndRender();
+          showToast("Hidden cleared");
+        });
+
+        els.playerManageList.addEventListener("click", function (event) {
+          var edit = event.target.closest("[data-edit-player]");
+          var hide = event.target.closest("[data-hide-player]");
+          if (edit) {
+            renamePlayer(edit.dataset.editPlayer);
+          }
+          if (hide) {
+            hidePlayer(hide.dataset.hidePlayer);
+          }
+        });
+
+        els.undoLast.addEventListener("click", function () {
+          if (!state.games.length) {
+            showToast("No games");
+            return;
+          }
+          state.games.pop();
+          saveAndRender();
+          showToast("Last game removed");
+        });
+
+        els.gameList.addEventListener("click", function (event) {
+          var del = event.target.closest("[data-delete-game]");
+          if (del) {
+            deleteGame(del.dataset.deleteGame);
+          }
+        });
+
+        els.shareText.addEventListener("click", shareExport);
+        els.copyText.addEventListener("click", function () {
+          copyToClipboard(buildTextExport()).then(function () {
+            showToast("Copied");
+          });
+        });
+        els.downloadText.addEventListener("click", function () {
+          downloadFile("pickleball-scores.txt", buildTextExport(), "text/plain");
+        });
+        els.downloadCsv.addEventListener("click", function () {
+          downloadFile("pickleball-games.csv", buildCsvExport(), "text/csv");
+        });
+        els.downloadJson.addEventListener("click", function () {
+          downloadFile("pickleball-backup.json", JSON.stringify(exportState(), null, 2), "application/json");
+        });
+        els.selectExport.addEventListener("click", function () {
+          els.exportText.focus();
+          els.exportText.select();
+        });
+
+        els.restoreBackup.addEventListener("click", restoreBackup);
+        els.wipeData.addEventListener("click", wipeData);
+      }
+
+      function showView(viewName) {
+        els.tabs.forEach(function (tab) {
+          tab.classList.toggle("active", tab.dataset.view === viewName);
+        });
+        els.views.forEach(function (view) {
+          view.classList.toggle("active", view.id === "view-" + viewName);
+        });
+      }
+
+      function openSettingsDialog() {
+        renderSettingsControls();
+        showDialog(els.settingsDialog);
+      }
+
+      function openInstallDialog() {
+        renderInstallDialog();
+        showDialog(els.addToHomeDialog);
+      }
+
+      function showDialog(dialog) {
+        if (!dialog) {
+          return;
+        }
+        if (dialog.showModal) {
+          if (!dialog.open) {
+            dialog.showModal();
+          }
+          return;
+        }
+        dialog.setAttribute("open", "");
+      }
+
+      function closeDialog(dialog) {
+        if (!dialog) {
+          return;
+        }
+        if (dialog.close && dialog.open) {
+          dialog.close();
+          return;
+        }
+        dialog.removeAttribute("open");
+      }
+
+      function updateTheme(theme) {
+        state.settings.theme = theme === "light" ? "light" : "dark";
+        saveAndRender();
+      }
+
+      function loadState() {
+        try {
+          var raw = window.localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            return JSON.parse(raw);
+          }
+        } catch (error) {
+          return clone(DEFAULT_STATE);
+        }
+        return clone(DEFAULT_STATE);
+      }
+
+      function normalizeState() {
+        state.appVersion = APP_VERSION;
+        state.players = Array.isArray(state.players) ? state.players : [];
+        state.games = Array.isArray(state.games) ? state.games : [];
+        state.settings = state.settings || {};
+        state.settings.theme = state.settings.theme || "dark";
+        state.draft = Object.assign(clone(DEFAULT_STATE.draft), state.draft || {});
+        state.draft.teamA = Array.isArray(state.draft.teamA) ? state.draft.teamA : [];
+        state.draft.teamB = Array.isArray(state.draft.teamB) ? state.draft.teamB : [];
+        state.draft.mode = state.draft.mode === "singles" ? "singles" : "doubles";
+        state.draft.winner = state.draft.winner === "B" ? "B" : "A";
+        state.draft.winScore = [11, 15, 21].indexOf(Number(state.draft.winScore)) >= 0 ? Number(state.draft.winScore) : 11;
+        state.draft.loserScore = clamp(Number(state.draft.loserScore) || 0, 0, state.draft.winScore - 1);
+        state.draft.scoreA = clamp(Number(state.draft.scoreA) || 0, 0, 99);
+        state.draft.scoreB = clamp(Number(state.draft.scoreB) || 0, 0, 99);
+        state.players.forEach(function (player) {
+          player.id = player.id || uid("p");
+          player.name = String(player.name || "Player").trim();
+          player.active = player.active !== false;
+        });
+        state.games.forEach(function (game) {
+          game.id = game.id || uid("g");
+          game.mode = game.mode === "singles" ? "singles" : "doubles";
+          game.teamA = Array.isArray(game.teamA) ? game.teamA : [];
+          game.teamB = Array.isArray(game.teamB) ? game.teamB : [];
+          game.scoreA = Number(game.scoreA) || 0;
+          game.scoreB = Number(game.scoreB) || 0;
+          game.playedAt = game.playedAt || new Date().toISOString();
+        });
+        enforceTeamSize();
+      }
+
+      function saveState() {
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (error) {
+          showToast("Storage full");
+        }
+      }
+
+      function saveAndRender() {
+        normalizeState();
+        saveState();
+        applyTheme();
+        renderAll();
+      }
+
+      function clone(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function uid(prefix) {
+        return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function esc(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function applyTheme() {
+        els.html.dataset.theme = state.settings.theme;
+        els.appIcon.src = state.settings.theme === "dark" ? "assets/icons/icon-192-dark.png" : "assets/icons/icon-192.png";
+        els.themeToggle.textContent = state.settings.theme === "dark" ? "Light" : "Dark";
+        renderSettingsControls();
+        updateVersionLabels();
+      }
+
+      function updateVersionLabels() {
+        var label = "v" + APP_VERSION;
+        els.versionLabel.textContent = label;
+        els.settingsVersionLabel.textContent = label;
+      }
+
+      function renderSettingsControls() {
+        els.settingsLightBtn.classList.toggle("active", state.settings.theme === "light");
+        els.settingsDarkBtn.classList.toggle("active", state.settings.theme === "dark");
+        els.settingsLightBtn.setAttribute("aria-pressed", state.settings.theme === "light");
+        els.settingsDarkBtn.setAttribute("aria-pressed", state.settings.theme === "dark");
+      }
+
+      function getInstallIconVariant() {
+        try {
+          var stored = window.localStorage.getItem(INSTALL_ICON_KEY);
+          if (stored === "light" || stored === "dark") {
+            return stored;
+          }
+        } catch (error) {
+          return state.settings.theme === "dark" ? "dark" : "light";
+        }
+        return state.settings.theme === "dark" ? "dark" : "light";
+      }
+
+      function setInstallIconVariant(variant, persist) {
+        var dark = variant === "dark";
+        var apple = document.querySelector('link[rel="apple-touch-icon"]');
+        var manifest = document.querySelector('link[rel="manifest"]');
+        var icon32 = document.querySelector('link[rel="icon"][sizes="32x32"]');
+        var icon16 = document.querySelector('link[rel="icon"][sizes="16x16"]');
+        if (apple) {
+          apple.href = dark ? "assets/icons/apple-touch-icon-dark.png" : "assets/icons/apple-touch-icon.png";
+        }
+        if (manifest) {
+          manifest.href = dark ? "manifest-dark.webmanifest" : "manifest.webmanifest";
+        }
+        if (icon32) {
+          icon32.href = dark ? "assets/icons/favicon-32-dark.png" : "assets/icons/favicon-32.png";
+        }
+        if (icon16) {
+          icon16.href = dark ? "assets/icons/favicon-16-dark.png" : "assets/icons/favicon-16.png";
+        }
+        if (persist) {
+          try {
+            window.localStorage.setItem(INSTALL_ICON_KEY, dark ? "dark" : "light");
+          } catch (error) { }
+        }
+        document.querySelectorAll('input[name="installIconVariant"]').forEach(function (radio) {
+          radio.checked = radio.value === (dark ? "dark" : "light");
+        });
+      }
+
+      function detectInstallPlatform() {
+        var ua = navigator.userAgent || "";
+        var platform = navigator.platform || "";
+        var touchMac = platform === "MacIntel" && navigator.maxTouchPoints > 1;
+        if (/iPhone|iPad|iPod/.test(ua) || touchMac) {
+          return "ios";
+        }
+        if (/Android/.test(ua)) {
+          return "android";
+        }
+        if (/Macintosh|Mac OS X/.test(ua)) {
+          return "mac";
+        }
+        if (/Windows/.test(ua)) {
+          return "windows";
+        }
+        return "desktop";
+      }
+
+      function installGuides() {
+        return {
+          ios: {
+            label: "iPhone or iPad",
+            subtitle: "Safari gives the cleanest Home Screen install.",
+            icon: "iOS",
+            steps: [
+              "Open Pickle Score in Safari.",
+              "Tap Share.",
+              "Choose Add to Home Screen, then tap Add."
+            ],
+            note: "If you choose a different icon here, reload before adding to Home Screen."
+          },
+          android: {
+            label: "Android",
+            subtitle: "Chrome usually offers the install prompt.",
+            icon: "And",
+            steps: [
+              "Open Pickle Score in Chrome.",
+              "Tap the browser menu.",
+              "Choose Install app or Add to Home screen."
+            ],
+            note: "If the prompt is hidden, bookmarking still keeps the local page easy to reach."
+          },
+          mac: {
+            label: "Mac",
+            subtitle: "Safari can add the app to the Dock.",
+            icon: "Mac",
+            steps: [
+              "Open Pickle Score in Safari.",
+              "Choose File, then Add to Dock.",
+              "Confirm the name and icon."
+            ],
+            note: "Safari caches the install icon at page load, so reload after changing icons."
+          },
+          windows: {
+            label: "Windows",
+            subtitle: "Chrome and Edge can install local web apps.",
+            icon: "Win",
+            steps: [
+              "Open Pickle Score in Chrome or Edge.",
+              "Open the browser menu.",
+              "Choose Apps, Install this site, or Pin to taskbar."
+            ],
+            note: "Browser wording varies a bit, but the installed app opens in its own window."
+          },
+          desktop: {
+            label: "Desktop",
+            subtitle: "Use your browser's install or shortcut controls.",
+            icon: "Web",
+            steps: [
+              "Open the browser menu.",
+              "Look for Install app, Add page to apps, or Create shortcut.",
+              "Keep a JSON backup before moving browsers."
+            ],
+            note: "A normal bookmark is still useful if the install option is not available."
+          }
+        };
+      }
+
+      function renderInstallDialog() {
+        var variant = getInstallIconVariant();
+        var platform = detectInstallPlatform();
+        var guides = installGuides();
+        var primary = guides[platform] || guides.desktop;
+        els.installDetectedDevice.textContent = primary.label;
+        els.installDeviceIcon.textContent = primary.icon;
+        setInstallIconVariant(variant, false);
+        els.installPrimaryGuide.innerHTML = installGuideHtml(primary);
+        els.installOtherGuides.innerHTML =
+          "<p class=\"install-other-heading\">Other devices</p>" +
+          Object.keys(guides).filter(function (key) {
+            return key !== platform;
+          }).map(function (key) {
+            var guide = guides[key];
+            return (
+              "<details class=\"install-device-details\">" +
+                "<summary><span>" + esc(guide.label) + "</span><span>" + esc(guide.icon) + "</span></summary>" +
+                installGuideStepsHtml(guide) +
+                "<p class=\"install-mini-note\">" + esc(guide.note) + "</p>" +
+              "</details>"
+            );
+          }).join("");
+      }
+
+      function installGuideHtml(guide) {
+        return (
+          "<div class=\"install-guide-head\">" +
+            "<span class=\"install-guide-title\"><b>" + esc(guide.label) + "</b><span>" + esc(guide.subtitle) + "</span></span>" +
+            "<span class=\"install-device-icon\" aria-hidden=\"true\">" + esc(guide.icon) + "</span>" +
+          "</div>" +
+          installGuideStepsHtml(guide) +
+          "<p class=\"install-mini-note\">" + esc(guide.note) + "</p>"
+        );
+      }
+
+      function installGuideStepsHtml(guide) {
+        return (
+          "<ol class=\"install-steps\">" +
+            guide.steps.map(function (step) {
+              return "<li>" + esc(step) + "</li>";
+            }).join("") +
+          "</ol>"
+        );
+      }
+
+      function teamSize() {
+        return state.draft.mode === "singles" ? 1 : 2;
+      }
+
+      function setMode(mode) {
+        state.draft.mode = mode === "singles" ? "singles" : "doubles";
+        enforceTeamSize();
+        saveAndRender();
+      }
+
+      function enforceTeamSize() {
+        var size = teamSize();
+        state.draft.teamA = uniqueExistingIds(state.draft.teamA).slice(0, size);
+        state.draft.teamB = uniqueExistingIds(state.draft.teamB).filter(function (id) {
+          return state.draft.teamA.indexOf(id) < 0;
+        }).slice(0, size);
+        if (state.draft.focus && !isValidFocus(state.draft.focus)) {
+          state.draft.focus = null;
+        }
+      }
+
+      function uniqueExistingIds(ids) {
+        var seen = {};
+        return ids.filter(function (id) {
+          if (seen[id] || !getPlayer(id)) {
+            return false;
+          }
+          seen[id] = true;
+          return true;
+        });
+      }
+
+      function getPlayer(id) {
+        return state.players.find(function (player) {
+          return player.id === id;
+        });
+      }
+
+      function playerName(id, game, side) {
+        var player = getPlayer(id);
+        if (player) {
+          return player.name;
+        }
+        var names = game && side === "A" ? game.teamANames : game && side === "B" ? game.teamBNames : null;
+        if (names) {
+          var ids = side === "A" ? game.teamA : game.teamB;
+          var index = ids.indexOf(id);
+          if (index >= 0 && names[index]) {
+            return names[index];
+          }
+        }
+        return "Player";
+      }
+
+      function teamNames(ids, game, side) {
+        return ids.map(function (id) {
+          return playerName(id, game, side);
+        }).join(" / ");
+      }
+
+      function selectedIds() {
+        return state.draft.teamA.concat(state.draft.teamB);
+      }
+
+      function selectedSet() {
+        var set = {};
+        selectedIds().forEach(function (id) {
+          set[id] = true;
+        });
+        return set;
+      }
+
+      function isValidFocus(focus) {
+        if (!focus) {
+          return false;
+        }
+        return (focus.team === "A" || focus.team === "B") && focus.index >= 0 && focus.index < teamSize();
+      }
+
+      function nextEmptySlot() {
+        var size = teamSize();
+        for (var i = 0; i < size; i += 1) {
+          if (!state.draft.teamA[i]) {
+            return { team: "A", index: i };
+          }
+        }
+        for (var j = 0; j < size; j += 1) {
+          if (!state.draft.teamB[j]) {
+            return { team: "B", index: j };
+          }
+        }
+        return null;
+      }
+
+      function focusLabel(slot) {
+        if (!slot) {
+          return "Full";
+        }
+        return "Next " + slot.team + (slot.index + 1);
+      }
+
+      function setSlot(slot, playerId) {
+        if (!slot || !getPlayer(playerId)) {
+          return;
+        }
+        removePlayerFromDraft(playerId);
+        var team = slot.team === "A" ? state.draft.teamA : state.draft.teamB;
+        team[slot.index] = playerId;
+        state.draft.focus = nextEmptySlot();
+      }
+
+      function handleSlotClick(team, index) {
+        var arr = team === "A" ? state.draft.teamA : state.draft.teamB;
+        if (arr[index]) {
+          arr.splice(index, 1);
+        }
+        state.draft.focus = { team: team, index: index };
+        saveAndRender();
+      }
+
+      function removePlayerFromDraft(playerId) {
+        state.draft.teamA = state.draft.teamA.filter(function (id) {
+          return id !== playerId;
+        });
+        state.draft.teamB = state.draft.teamB.filter(function (id) {
+          return id !== playerId;
+        });
+      }
+
+      function togglePlayerInDraft(playerId) {
+        if (!getPlayer(playerId)) {
+          return;
+        }
+        if (selectedIds().indexOf(playerId) >= 0) {
+          removePlayerFromDraft(playerId);
+          state.draft.focus = nextEmptySlot();
+        } else {
+          setSlot(isValidFocus(state.draft.focus) ? state.draft.focus : nextEmptySlot(), playerId);
+        }
+        saveAndRender();
+      }
+
+      function clearDraftTeams() {
+        state.draft.teamA = [];
+        state.draft.teamB = [];
+        state.draft.focus = { team: "A", index: 0 };
+        state.draft.winner = "A";
+        state.draft.loserScore = Math.min(9, state.draft.winScore - 1);
+        syncScoreFromQuick();
+        saveAndRender();
+      }
+
+      function loadRematch() {
+        var source = state.lastTeams;
+        var last = state.games[state.games.length - 1];
+        if (!source && last) {
+          source = { mode: last.mode, teamA: last.teamA, teamB: last.teamB };
+        }
+        if (!source) {
+          showToast("No rematch");
+          return;
+        }
+        state.draft.mode = source.mode === "singles" ? "singles" : "doubles";
+        state.draft.teamA = source.teamA.slice();
+        state.draft.teamB = source.teamB.slice();
+        state.draft.focus = nextEmptySlot();
+        syncScoreFromQuick();
+        saveAndRender();
+        showToast("Teams loaded");
+      }
+
+      function syncScoreFromQuick() {
+        var loser = clamp(Number(state.draft.loserScore) || 0, 0, state.draft.winScore - 1);
+        var winnerScore = loser >= state.draft.winScore - 1 ? loser + 2 : state.draft.winScore;
+        state.draft.loserScore = loser;
+        if (state.draft.winner === "A") {
+          state.draft.scoreA = winnerScore;
+          state.draft.scoreB = loser;
+        } else {
+          state.draft.scoreA = loser;
+          state.draft.scoreB = winnerScore;
+        }
+      }
+
+      function adjustScore(raw) {
+        var parts = raw.split(":");
+        var team = parts[0];
+        var delta = Number(parts[1]);
+        if (team === "A") {
+          state.draft.scoreA = clamp(state.draft.scoreA + delta, 0, 99);
+        } else {
+          state.draft.scoreB = clamp(state.draft.scoreB + delta, 0, 99);
+        }
+        if (state.draft.scoreA !== state.draft.scoreB) {
+          state.draft.winner = state.draft.scoreA > state.draft.scoreB ? "A" : "B";
+          state.draft.loserScore = Math.min(state.draft.scoreA, state.draft.scoreB);
+        }
+        saveAndRender();
+      }
+
+      function draftReady() {
+        var size = teamSize();
+        return state.draft.teamA.length === size &&
+          state.draft.teamB.length === size &&
+          state.draft.scoreA !== state.draft.scoreB;
+      }
+
+      function saveGame() {
+        if (!draftReady()) {
+          showToast(saveButtonText());
+          return;
+        }
+        var game = {
+          id: uid("g"),
+          playedAt: new Date().toISOString(),
+          mode: state.draft.mode,
+          teamA: state.draft.teamA.slice(0, teamSize()),
+          teamB: state.draft.teamB.slice(0, teamSize()),
+          teamANames: state.draft.teamA.map(function (id) { return playerName(id); }),
+          teamBNames: state.draft.teamB.map(function (id) { return playerName(id); }),
+          scoreA: state.draft.scoreA,
+          scoreB: state.draft.scoreB
+        };
+        state.games.push(game);
+        state.lastTeams = {
+          mode: game.mode,
+          teamA: game.teamA.slice(),
+          teamB: game.teamB.slice()
+        };
+        clearDraftTeams();
+        showToast("Game saved");
+      }
+
+      function saveButtonText() {
+        var size = teamSize();
+        if (state.draft.teamA.length < size || state.draft.teamB.length < size) {
+          return "Pick players";
+        }
+        if (state.draft.scoreA === state.draft.scoreB) {
+          return "Score tied";
+        }
+        return "Save Game";
+      }
+
+      function addPlayersFromText(text) {
+        var names = String(text || "")
+          .split(/[\n,]+/)
+          .map(function (name) { return name.trim(); })
+          .filter(Boolean);
+        var existing = {};
+        state.players.forEach(function (player) {
+          existing[player.name.toLowerCase()] = player;
+        });
+        var added = 0;
+        names.forEach(function (name) {
+          var key = name.toLowerCase();
+          if (existing[key]) {
+            existing[key].active = true;
+            return;
+          }
+          var player = { id: uid("p"), name: name, active: true };
+          state.players.push(player);
+          existing[key] = player;
+          added += 1;
+        });
+        state.players.sort(function (a, b) {
+          return a.name.localeCompare(b.name);
+        });
+        return added;
+      }
+
+      function renamePlayer(playerId) {
+        var player = getPlayer(playerId);
+        if (!player) {
+          return;
+        }
+        var next = window.prompt("Player name", player.name);
+        if (!next) {
+          return;
+        }
+        player.name = next.trim();
+        player.active = true;
+        state.players.sort(function (a, b) {
+          return a.name.localeCompare(b.name);
+        });
+        saveAndRender();
+      }
+
+      function hidePlayer(playerId) {
+        var player = getPlayer(playerId);
+        if (!player) {
+          return;
+        }
+        if (player.active === false) {
+          player.active = true;
+          saveAndRender();
+          return;
+        }
+        if (usedPlayerIds().has(playerId)) {
+          player.active = false;
+        } else {
+          state.players = state.players.filter(function (item) {
+            return item.id !== playerId;
+          });
+        }
+        removePlayerFromDraft(playerId);
+        saveAndRender();
+      }
+
+      function usedPlayerIds() {
+        var used = new Set();
+        state.games.forEach(function (game) {
+          game.teamA.concat(game.teamB).forEach(function (id) {
+            used.add(id);
+          });
+        });
+        return used;
+      }
+
+      function deleteGame(gameId) {
+        state.games = state.games.filter(function (game) {
+          return game.id !== gameId;
+        });
+        saveAndRender();
+        showToast("Game removed");
+      }
+
+      function renderAll() {
+        renderMiniStats();
+        renderModes();
+        renderTeams();
+        renderScore();
+        renderRoster();
+        renderRankings();
+        renderGames();
+        renderData();
+      }
+
+      function renderMiniStats() {
+        var stats = buildStats();
+        var top = stats.players[0];
+        els.miniStats.innerHTML =
+          "<span>" + state.games.length + " games</span>" +
+          "<span>" + activePlayers().length + " players</span>" +
+          "<span>" + (top ? "Top " + esc(top.name) : "No ranking") + "</span>";
+      }
+
+      function renderModes() {
+        document.querySelectorAll("[data-mode]").forEach(function (button) {
+          button.classList.toggle("active", button.dataset.mode === state.draft.mode);
+        });
+        document.querySelectorAll("[data-win-score]").forEach(function (button) {
+          button.classList.toggle("active", Number(button.dataset.winScore) === state.draft.winScore);
+        });
+      }
+
+      function renderTeams() {
+        var score = { A: state.draft.scoreA, B: state.draft.scoreB };
+        var focus = state.draft.focus || nextEmptySlot();
+        els.nextSlot.textContent = focusLabel(focus);
+        els.teamBoard.innerHTML = ["A", "B"].map(function (team) {
+          var ids = team === "A" ? state.draft.teamA : state.draft.teamB;
+          var slots = [];
+          for (var i = 0; i < teamSize(); i += 1) {
+            var id = ids[i];
+            var focused = focus && focus.team === team && focus.index === i;
+            slots.push(
+              "<button type=\"button\" class=\"slot " +
+              (id ? "filled " : "") +
+              (focused ? "focused" : "") +
+              "\" data-slot=\"1\" data-team=\"" + team + "\" data-index=\"" + i + "\">" +
+              esc(id ? playerName(id) : team + (i + 1)) +
+              "</button>"
+            );
+          }
+          return (
+            "<div class=\"team " + (state.draft.winner === team ? "is-winner" : "") + "\">" +
+              "<div class=\"team-title\"><span>Team " + team + "</span><span class=\"score-badge\">" + score[team] + "</span></div>" +
+              "<div class=\"slots\">" + slots.join("") + "</div>" +
+              "<button type=\"button\" class=\"winner-button " + (state.draft.winner === team ? "active" : "") + "\" data-winner=\"" + team + "\">Team " + team + " Wins</button>" +
+            "</div>"
+          );
+        }).join("");
+      }
+
+      function renderScore() {
+        els.scoreA.textContent = state.draft.scoreA;
+        els.scoreB.textContent = state.draft.scoreB;
+        var scores = [];
+        for (var i = 0; i < state.draft.winScore; i += 1) {
+          scores.push(
+            "<button type=\"button\" class=\"" + (i === state.draft.loserScore ? "active" : "") + "\" data-loser-score=\"" + i + "\">" + i + "</button>"
+          );
+        }
+        els.loserGrid.innerHTML = scores.join("");
+        els.saveGame.disabled = !draftReady();
+        els.saveGame.textContent = draftReady() ? "Save Game" : saveButtonText();
+        els.saveGame.classList.toggle("warning", !draftReady());
+      }
+
+      function activePlayers() {
+        return state.players.filter(function (player) {
+          return player.active !== false;
+        });
+      }
+
+      function renderRoster() {
+        var query = els.playerSearch.value.trim().toLowerCase();
+        var selected = selectedSet();
+        var players = activePlayers();
+        if (!players.length) {
+          els.rosterGrid.innerHTML = "<div class=\"empty\">No players yet</div>";
+          return;
+        }
+        els.rosterGrid.innerHTML = players.map(function (player) {
+          var hidden = query && player.name.toLowerCase().indexOf(query) < 0;
+          return (
+            "<button type=\"button\" class=\"player-chip " +
+            (selected[player.id] ? "selected " : "") +
+            (hidden ? "hidden" : "") +
+            "\" data-player=\"" + esc(player.id) + "\">" + esc(player.name) + "</button>"
+          );
+        }).join("");
+      }
+
+      function buildStats() {
+        var map = new Map();
+        function ensure(id, name) {
+          if (!map.has(id)) {
+            map.set(id, {
+              id: id,
+              name: name || playerName(id),
+              games: 0,
+              wins: 0,
+              losses: 0,
+              pf: 0,
+              pa: 0,
+              diff: 0,
+              rating: 1500
+            });
+          }
+          return map.get(id);
+        }
+        state.players.forEach(function (player) {
+          ensure(player.id, player.name);
+        });
+
+        state.games.slice().sort(function (a, b) {
+          return new Date(a.playedAt) - new Date(b.playedAt);
+        }).forEach(function (game) {
+          game.teamA.forEach(function (id) { ensure(id, playerName(id, game, "A")); });
+          game.teamB.forEach(function (id) { ensure(id, playerName(id, game, "B")); });
+
+          var ratingA = average(game.teamA.map(function (id) { return ensure(id).rating; }));
+          var ratingB = average(game.teamB.map(function (id) { return ensure(id).rating; }));
+          var expectedA = 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
+          var resultA = game.scoreA > game.scoreB ? 1 : 0;
+          var margin = Math.abs(game.scoreA - game.scoreB);
+          var topScore = Math.max(game.scoreA, game.scoreB, 1);
+          var k = 24 * Math.min(1.75, 1 + margin / (topScore * 2));
+          var deltaA = k * (resultA - expectedA);
+
+          applyGameStats(game.teamA, game.scoreA, game.scoreB, resultA === 1, deltaA);
+          applyGameStats(game.teamB, game.scoreB, game.scoreA, resultA === 0, -deltaA);
+        });
+
+        var players = Array.from(map.values()).map(function (item) {
+          item.winRate = item.games ? item.wins / item.games : 0;
+          return item;
+        }).sort(function (a, b) {
+          return b.rating - a.rating || b.winRate - a.winRate || b.games - a.games || a.name.localeCompare(b.name);
+        });
+
+        return {
+          players: players.filter(function (player) { return player.games > 0; }),
+          allPlayers: players,
+          pairs: buildPairStats()
+        };
+
+        function applyGameStats(ids, pf, pa, won, delta) {
+          ids.forEach(function (id) {
+            var stat = ensure(id);
+            stat.games += 1;
+            stat.wins += won ? 1 : 0;
+            stat.losses += won ? 0 : 1;
+            stat.pf += pf;
+            stat.pa += pa;
+            stat.diff += pf - pa;
+            stat.rating += delta;
+          });
+        }
+      }
+
+      function buildPairStats() {
+        var pairs = new Map();
+        state.games.forEach(function (game) {
+          addPair(game.teamA, game.scoreA, game.scoreB, game);
+          addPair(game.teamB, game.scoreB, game.scoreA, game);
+        });
+        return Array.from(pairs.values()).map(function (pair) {
+          pair.winRate = pair.games ? pair.wins / pair.games : 0;
+          return pair;
+        }).sort(function (a, b) {
+          return b.winRate - a.winRate || b.games - a.games || b.diff - a.diff || a.name.localeCompare(b.name);
+        });
+
+        function addPair(ids, pf, pa, game) {
+          if (ids.length !== 2) {
+            return;
+          }
+          var key = ids.slice().sort().join("|");
+          if (!pairs.has(key)) {
+            pairs.set(key, {
+              key: key,
+              name: ids.map(function (id) { return playerName(id, game, game.teamA.indexOf(id) >= 0 ? "A" : "B"); }).join(" / "),
+              games: 0,
+              wins: 0,
+              losses: 0,
+              diff: 0
+            });
+          }
+          var pair = pairs.get(key);
+          pair.games += 1;
+          pair.wins += pf > pa ? 1 : 0;
+          pair.losses += pf > pa ? 0 : 1;
+          pair.diff += pf - pa;
+        }
+      }
+
+      function average(values) {
+        if (!values.length) {
+          return 1500;
+        }
+        return values.reduce(function (sum, value) { return sum + value; }, 0) / values.length;
+      }
+
+      function renderRankings() {
+        var stats = buildStats();
+        var top = stats.players[0];
+        var last = state.games[state.games.length - 1];
+        els.statStrip.innerHTML =
+          "<div class=\"stat\"><span class=\"stat-value\">" + state.games.length + "</span><span class=\"stat-label\">Games</span></div>" +
+          "<div class=\"stat\"><span class=\"stat-value\">" + activePlayers().length + "</span><span class=\"stat-label\">Players</span></div>" +
+          "<div class=\"stat\"><span class=\"stat-value\">" + esc(top ? top.name : "-") + "</span><span class=\"stat-label\">Top</span></div>";
+        els.rankingCount.textContent = stats.players.length ? stats.players.length + " ranked" : "";
+        els.rankingList.innerHTML = stats.players.length ? stats.players.map(function (player, index) {
+          return (
+            "<div class=\"ranking-row\">" +
+              "<div class=\"rank-number\">" + (index + 1) + "</div>" +
+              "<div class=\"rank-main\">" +
+                "<div class=\"rank-title\">" + esc(player.name) + "</div>" +
+                "<div class=\"rank-meta\">" + player.wins + "-" + player.losses + " | " + pct(player.winRate) + " | diff " + signed(player.diff) + "</div>" +
+              "</div>" +
+              "<div class=\"rank-score\">" + Math.round(player.rating) + "</div>" +
+            "</div>"
+          );
+        }).join("") : "<div class=\"empty\">No ranked games</div>";
+
+        var pairStats = stats.pairs.filter(function (pair) { return pair.games > 0; });
+        els.pairCount.textContent = pairStats.length ? pairStats.length + " pairs" : "";
+        els.pairList.innerHTML = pairStats.length ? pairStats.slice(0, 20).map(function (pair) {
+          return (
+            "<div class=\"pair-row\">" +
+              "<div class=\"pair-main\">" +
+                "<div class=\"pair-title\">" + esc(pair.name) + "</div>" +
+                "<div class=\"pair-meta\">" + pair.wins + "-" + pair.losses + " | " + pct(pair.winRate) + " | diff " + signed(pair.diff) + "</div>" +
+              "</div>" +
+            "</div>"
+          );
+        }).join("") : "<div class=\"empty\">No doubles pairs</div>";
+
+        if (last) {
+          els.undoLast.disabled = false;
+        } else {
+          els.undoLast.disabled = true;
+        }
+      }
+
+      function renderGames() {
+        if (!state.games.length) {
+          els.gameList.innerHTML = "<div class=\"empty\">No games recorded</div>";
+          return;
+        }
+        els.gameList.innerHTML = state.games.slice().reverse().map(function (game) {
+          var aWon = game.scoreA > game.scoreB;
+          var winnerName = aWon ? teamNames(game.teamA, game, "A") : teamNames(game.teamB, game, "B");
+          var loserName = aWon ? teamNames(game.teamB, game, "B") : teamNames(game.teamA, game, "A");
+          var score = aWon ? game.scoreA + "-" + game.scoreB : game.scoreB + "-" + game.scoreA;
+          return (
+            "<div class=\"game-row\">" +
+              "<div class=\"game-main\">" +
+                "<div class=\"game-title\">" + esc(winnerName) + " def " + esc(loserName) + "</div>" +
+                "<div class=\"game-meta\">" + formatDate(game.playedAt) + " | " + esc(game.mode) + "</div>" +
+              "</div>" +
+              "<div class=\"row\">" +
+                "<div class=\"game-score\">" + score + "</div>" +
+                "<button class=\"delete-button\" type=\"button\" data-delete-game=\"" + esc(game.id) + "\">x</button>" +
+              "</div>" +
+            "</div>"
+          );
+        }).join("");
+      }
+
+      function renderData() {
+        var players = state.players.slice().sort(function (a, b) {
+          return a.name.localeCompare(b.name);
+        });
+        els.rosterCount.textContent = activePlayers().length + " active";
+        els.playerManageList.innerHTML = players.length ? players.map(function (player) {
+          return (
+            "<div class=\"player-row\">" +
+              "<div class=\"player-name\">" + esc(player.name) + (player.active ? "" : " <span class=\"muted\">hidden</span>") + "</div>" +
+              "<button type=\"button\" data-edit-player=\"" + esc(player.id) + "\">Edit</button>" +
+              "<button type=\"button\" data-hide-player=\"" + esc(player.id) + "\">" + (player.active ? "Hide" : "Show") + "</button>" +
+            "</div>"
+          );
+        }).join("") : "<div class=\"empty\">No players yet</div>";
+
+        var text = buildTextExport();
+        els.exportText.value = text;
+        els.exportSize.textContent = text.length + " chars";
+      }
+
+      function pct(value) {
+        return Math.round(value * 100) + "%";
+      }
+
+      function signed(value) {
+        return (value > 0 ? "+" : "") + value;
+      }
+
+      function formatDate(iso) {
+        var date = new Date(iso);
+        if (Number.isNaN(date.getTime())) {
+          return "";
+        }
+        return date.toLocaleString([], {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit"
+        });
+      }
+
+      function formatDateLong(iso) {
+        var date = new Date(iso);
+        if (Number.isNaN(date.getTime())) {
+          return "";
+        }
+        return date.toLocaleString([], {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit"
+        });
+      }
+
+      function buildTextExport() {
+        var stats = buildStats();
+        var lines = [];
+        lines.push("Pickleball Scores");
+        lines.push("Updated: " + formatDateLong(new Date().toISOString()));
+        lines.push("");
+        lines.push("Rankings");
+        if (stats.players.length) {
+          stats.players.forEach(function (player, index) {
+            lines.push((index + 1) + ". " + player.name + " - " + Math.round(player.rating) + " - " + player.wins + "-" + player.losses + " - " + pct(player.winRate) + " - diff " + signed(player.diff));
+          });
+        } else {
+          lines.push("No ranked games");
+        }
+        lines.push("");
+        lines.push("Games");
+        if (state.games.length) {
+          state.games.slice().reverse().forEach(function (game) {
+            var aWon = game.scoreA > game.scoreB;
+            var winnerName = aWon ? teamNames(game.teamA, game, "A") : teamNames(game.teamB, game, "B");
+            var loserName = aWon ? teamNames(game.teamB, game, "B") : teamNames(game.teamA, game, "A");
+            var score = aWon ? game.scoreA + "-" + game.scoreB : game.scoreB + "-" + game.scoreA;
+            lines.push(formatDateLong(game.playedAt) + " - " + winnerName + " def " + loserName + " " + score);
+          });
+        } else {
+          lines.push("No games recorded");
+        }
+        return lines.join("\n");
+      }
+
+      function buildCsvExport() {
+        var rows = [[
+          "played_at",
+          "mode",
+          "team_a",
+          "team_b",
+          "score_a",
+          "score_b",
+          "winner",
+          "margin"
+        ]];
+        state.games.forEach(function (game) {
+          var aWon = game.scoreA > game.scoreB;
+          rows.push([
+            game.playedAt,
+            game.mode,
+            teamNames(game.teamA, game, "A"),
+            teamNames(game.teamB, game, "B"),
+            game.scoreA,
+            game.scoreB,
+            aWon ? teamNames(game.teamA, game, "A") : teamNames(game.teamB, game, "B"),
+            Math.abs(game.scoreA - game.scoreB)
+          ]);
+        });
+        return rows.map(function (row) {
+          return row.map(csvCell).join(",");
+        }).join("\n");
+      }
+
+      function csvCell(value) {
+        var text = String(value == null ? "" : value);
+        if (/[",\n]/.test(text)) {
+          return "\"" + text.replace(/"/g, "\"\"") + "\"";
+        }
+        return text;
+      }
+
+      function exportState() {
+        return {
+          app: "Pickle Score",
+          version: 1,
+          appVersion: APP_VERSION,
+          exportedAt: new Date().toISOString(),
+          data: {
+            players: state.players,
+            games: state.games,
+            settings: state.settings
+          }
+        };
+      }
+
+      function shareExport() {
+        var text = buildTextExport();
+        if (navigator.share) {
+          navigator.share({
+            title: "Pickleball Scores",
+            text: text
+          }).then(function () {
+            showToast("Shared");
+          }).catch(function () {
+            copyToClipboard(text).then(function () {
+              showToast("Copied");
+            });
+          });
+        } else {
+          copyToClipboard(text).then(function () {
+            showToast("Copied");
+          });
+        }
+      }
+
+      function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text);
+        }
+        return new Promise(function (resolve) {
+          var temp = document.createElement("textarea");
+          temp.value = text;
+          temp.setAttribute("readonly", "");
+          temp.style.position = "fixed";
+          temp.style.opacity = "0";
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand("copy");
+          document.body.removeChild(temp);
+          resolve();
+        });
+      }
+
+      function downloadFile(filename, text, type) {
+        var blob = new Blob([text], { type: type });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.setTimeout(function () {
+          URL.revokeObjectURL(url);
+        }, 500);
+      }
+
+      function restoreBackup() {
+        var raw = els.backupJson.value.trim();
+        if (!raw) {
+          showToast("Paste JSON first");
+          return;
+        }
+        try {
+          var parsed = JSON.parse(raw);
+          var data = parsed.data || parsed;
+          if (!Array.isArray(data.players) || !Array.isArray(data.games)) {
+            throw new Error("Bad backup");
+          }
+          state.players = data.players;
+          state.games = data.games;
+          state.settings = data.settings || state.settings;
+          state.lastTeams = null;
+          state.draft = clone(DEFAULT_STATE.draft);
+          normalizeState();
+          saveAndRender();
+          els.backupJson.value = "";
+          showToast("Backup restored");
+        } catch (error) {
+          showToast("Invalid JSON");
+        }
+      }
+
+      function wipeData() {
+        if (!window.confirm("Wipe all players and games?")) {
+          return;
+        }
+        state = clone(DEFAULT_STATE);
+        saveAndRender();
+        showToast("Data wiped");
+      }
+
+      function showToast(message) {
+        window.clearTimeout(toastTimer);
+        els.toast.textContent = message;
+        els.toast.classList.add("show");
+        toastTimer = window.setTimeout(function () {
+          els.toast.classList.remove("show");
+        }, 1700);
+      }
+    }());
+  </script>
+</body>
+</html>
