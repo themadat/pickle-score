@@ -1,5 +1,33 @@
 const CHANGELOG = [
   {
+    version: "1.0.0.7",
+    date: "2026-07-04",
+    title: "Thumb Reach",
+    summary: "Player selection, app title actions, and JSON backups are easier to reach from the court.",
+    highlights: [
+      "Changed the player list to one-line rows with games and record.",
+      "Moved search to a sticky bottom bar that can also add players.",
+      "Added top-bar JSON export and import buttons.",
+      "Let JSON imports merge with or overwrite current data."
+    ],
+    updateSections: [
+      {
+        heading: "Players",
+        items: [
+          "Player rows now show name, games played, and win-loss record on one line.",
+          "The search field stays at the bottom of the Players screen and adds its current text as a player."
+        ]
+      },
+      {
+        heading: "Backups",
+        items: [
+          "Added title-bar shortcuts for exporting and importing JSON backups.",
+          "File imports ask whether to merge into existing data or overwrite it."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0.0.6",
     date: "2026-07-04",
     title: "Quick Switch",

@@ -235,20 +235,21 @@
 
     .brand-copy {
       display: grid;
+      justify-items: center;
       gap: 4px;
       min-width: 0;
     }
 
     .brand-title {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 7px;
+      display: grid;
+      justify-items: center;
+      gap: 5px;
       min-width: 0;
+      text-align: center;
     }
 
     .mini-stats {
-      display: flex;
+      display: none;
       flex-wrap: wrap;
       gap: 6px;
       color: var(--muted);
@@ -273,6 +274,7 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
+      flex-wrap: wrap;
       gap: 6px;
       flex: 0 0 auto;
     }
@@ -679,27 +681,19 @@
       border: 1px solid var(--line);
     }
 
-    .roster-tools {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-    }
-
-    .roster-tools .icon-button {
-      flex: 0 0 auto;
-    }
-
     .roster-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-      gap: 8px;
+      grid-template-columns: 1fr;
+      gap: 6px;
     }
 
     .player-chip {
       display: grid;
-      gap: 3px;
-      min-height: 44px;
-      padding: 7px 9px;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 7px 10px;
       border: 1px solid var(--line);
       background: var(--panel);
       color: var(--text);
@@ -714,21 +708,41 @@
     }
 
     .player-chip-name,
-    .player-chip-meta {
+    .player-chip-meta,
+    .player-chip-record {
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .player-chip-meta {
+    .player-chip-meta,
+    .player-chip-record {
       color: var(--muted);
       font-size: 0.72rem;
       font-weight: 800;
     }
 
+    .player-chip-record {
+      min-width: 44px;
+      color: var(--accent);
+      text-align: right;
+    }
+
     .player-chip.hidden {
       display: none;
+    }
+
+    .player-search-dock {
+      position: sticky;
+      bottom: max(8px, env(safe-area-inset-bottom));
+      z-index: 4;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      margin: 8px 0 0;
+      padding-top: 8px;
+      background: linear-gradient(180deg, transparent, var(--panel) 18px);
     }
 
     .matchup-list {
@@ -1640,7 +1654,10 @@
         </div>
       </div>
       <div class="top-actions" aria-label="App actions">
+        <button id="titleExportJson" type="button">Export</button>
+        <button id="titleImportJson" type="button">Import</button>
         <button id="settingsBtn" type="button">Settings</button>
+        <input id="jsonImportFile" type="file" accept="application/json,.json" hidden>
       </div>
     </header>
 
@@ -1657,14 +1674,13 @@
           <h2 id="playersTitle">Players</h2>
           <span class="muted" id="selectionStatus">0 of 4 selected</span>
         </div>
-        <input id="playerSearch" autocomplete="off" placeholder="Search players" aria-label="Search players">
         <div class="selection-bar">
           <span class="selection-status" id="playerOrderNote">Most games first, then A-Z</span>
           <button class="primary-action" id="playersGo" type="button">Go</button>
         </div>
         <div class="roster-grid" id="rosterGrid"></div>
-        <form class="roster-tools" id="quickAddForm">
-          <input id="quickAddName" autocomplete="off" placeholder="Add player" aria-label="Add player">
+        <form class="player-search-dock" id="quickAddForm">
+          <input id="playerSearch" autocomplete="off" placeholder="Search or add player" aria-label="Search or add player">
           <button type="submit">Add</button>
         </form>
       </div>
@@ -1940,7 +1956,7 @@
     (function () {
       "use strict";
 
-      var APP_VERSION = "1.0.0.6";
+      var APP_VERSION = "1.0.0.7";
       var STORAGE_KEY = "pickle-score-state-v1";
       var INSTALL_ICON_KEY = "psInstallIconVariant";
       var DEFAULT_STATE = {
@@ -1975,6 +1991,9 @@
         miniStats: document.getElementById("miniStats"),
         versionLabel: document.getElementById("versionLabel"),
         settingsVersionLabel: document.getElementById("settingsVersionLabel"),
+        titleExportJson: document.getElementById("titleExportJson"),
+        titleImportJson: document.getElementById("titleImportJson"),
+        jsonImportFile: document.getElementById("jsonImportFile"),
         settingsBtn: document.getElementById("settingsBtn"),
         addToHomeDialog: document.getElementById("addToHomeDialog"),
         settingsDialog: document.getElementById("settingsDialog"),
@@ -2012,7 +2031,6 @@
         loserGrid: document.getElementById("loserGrid"),
         saveGame: document.getElementById("saveGame"),
         quickAddForm: document.getElementById("quickAddForm"),
-        quickAddName: document.getElementById("quickAddName"),
         playerSearch: document.getElementById("playerSearch"),
         rosterGrid: document.getElementById("rosterGrid"),
         statStrip: document.getElementById("statStrip"),
@@ -2060,6 +2078,12 @@
           });
         });
 
+        els.titleExportJson.addEventListener("click", downloadJsonBackup);
+        els.titleImportJson.addEventListener("click", function () {
+          els.jsonImportFile.value = "";
+          els.jsonImportFile.click();
+        });
+        els.jsonImportFile.addEventListener("change", importBackupFile);
         els.settingsBtn.addEventListener("click", openSettingsDialog);
         els.settingsInstallBtn.addEventListener("click", function () {
           closeDialog(els.settingsDialog);
@@ -2203,12 +2227,12 @@
 
         els.quickAddForm.addEventListener("submit", function (event) {
           event.preventDefault();
-          var name = els.quickAddName.value.trim();
+          var name = els.playerSearch.value.trim();
           if (name) {
-            addPlayersFromText(name);
-            els.quickAddName.value = "";
+            var added = addPlayersFromText(name);
+            els.playerSearch.value = "";
             saveAndRender();
-            showToast("Player added");
+            showToast(added ? "Player added" : "Player already listed");
           }
         });
 
@@ -2277,9 +2301,7 @@
         els.downloadCsv.addEventListener("click", function () {
           downloadFile("pickleball-games.csv", buildCsvExport(), "text/csv");
         });
-        els.downloadJson.addEventListener("click", function () {
-          downloadFile("pickleball-backup.json", JSON.stringify(exportState(), null, 2), "application/json");
-        });
+        els.downloadJson.addEventListener("click", downloadJsonBackup);
         els.selectExport.addEventListener("click", function () {
           els.exportText.focus();
           els.exportText.select();
@@ -2481,7 +2503,7 @@
 
       function renderStaticButtonIcons() {
         var tabIcons = {
-          players: ["play", "Play"],
+          players: ["players", "Play"],
           rank: ["trophy", "Rankings"],
           games: ["list", "Games"],
           data: ["data", "Data"]
@@ -2490,6 +2512,8 @@
           var setup = tabIcons[tab.dataset.view] || ["eye", "Screen"];
           setIconButton(tab, setup[0], setup[1]);
         });
+        setIconButton(els.titleExportJson, "exportFile", "Export JSON");
+        setIconButton(els.titleImportJson, "restore", "Import JSON");
         setIconButton(els.settingsBtn, "settings", "Settings");
         setIconButton(els.playersGo, "play", "Go");
         setIconButton(els.matchupsBack, "arrowCounterclockwise", "Back to players");
@@ -2534,7 +2558,7 @@
         setIconButton(els.settingsLightBtn, "sun", "Light theme");
         setIconButton(els.settingsDarkBtn, "moon", "Dark theme");
         setIconButton(els.settingsInstallBtn, "addApp", "Add as App");
-        setIconButton(els.settingsPlayersBtn, "addPlayer", "Players");
+        setIconButton(els.settingsPlayersBtn, "players", "Players");
         setIconButton(els.settingsRankBtn, "chart", "Rankings");
         setIconButton(els.settingsGamesBtn, "list", "Games");
         setIconButton(els.settingsDataBtn, "data", "Data");
@@ -3267,6 +3291,10 @@
         var query = els.playerSearch.value.trim().toLowerCase();
         var selected = selectedSet();
         var counts = playerGameCounts();
+        var statByPlayer = {};
+        buildStats().allPlayers.forEach(function (stat) {
+          statByPlayer[stat.id] = stat;
+        });
         var players = orderedActivePlayers();
         var filtered = players.filter(function (player) {
           return !query || player.name.toLowerCase().indexOf(query) >= 0;
@@ -3285,12 +3313,14 @@
         }
         els.rosterGrid.innerHTML = filtered.map(function (player) {
           var count = counts[player.id] || 0;
+          var stat = statByPlayer[player.id] || { wins: 0, losses: 0 };
           return (
             "<button type=\"button\" class=\"player-chip " +
             (selected[player.id] ? "selected " : "") +
             "\" data-player=\"" + esc(player.id) + "\" aria-pressed=\"" + (selected[player.id] ? "true" : "false") + "\">" +
               "<span class=\"player-chip-name\">" + esc(player.name) + "</span>" +
               "<span class=\"player-chip-meta\">" + count + " game" + (count === 1 ? "" : "s") + "</span>" +
+              "<span class=\"player-chip-record\">" + stat.wins + "-" + stat.losses + "</span>" +
             "</button>"
           );
         }).join("");
@@ -3720,29 +3750,172 @@
         }, 500);
       }
 
-      function restoreBackup() {
-        var raw = els.backupJson.value.trim();
-        if (!raw) {
-          showToast("Paste JSON first");
+      function downloadJsonBackup() {
+        downloadFile("pickle-score-backup.json", JSON.stringify(exportState(), null, 2), "application/json");
+        showToast("JSON exported");
+      }
+
+      function importBackupFile(event) {
+        var file = event.target.files && event.target.files[0];
+        if (!file) {
           return;
         }
+        var reader = new FileReader();
+        reader.onload = function () {
+          importBackupText(String(reader.result || ""), true);
+          els.jsonImportFile.value = "";
+        };
+        reader.onerror = function () {
+          els.jsonImportFile.value = "";
+          showToast("Import failed");
+        };
+        reader.readAsText(file);
+      }
+
+      function importBackupText(raw, askMode) {
+        if (!String(raw || "").trim()) {
+          showToast("Choose JSON first");
+          return false;
+        }
         try {
-          var parsed = JSON.parse(raw);
-          var data = parsed.data || parsed;
-          if (!Array.isArray(data.players) || !Array.isArray(data.games)) {
-            throw new Error("Bad backup");
+          var data = parseBackupData(raw);
+          var mode = askMode ? chooseImportMode() : "overwrite";
+          if (!mode) {
+            return false;
           }
+          if (mode === "overwrite" && !window.confirm("Overwrite all current players and games?")) {
+            showToast("Import cancelled");
+            return false;
+          }
+          var result = applyImportedBackup(data, mode);
+          if (mode === "merge") {
+            showToast("Merged " + result.players + " players, " + result.games + " games");
+          } else {
+            showToast("Backup restored");
+          }
+          return true;
+        } catch (error) {
+          showToast("Invalid JSON");
+          return false;
+        }
+      }
+
+      function chooseImportMode() {
+        var answer = window.prompt("Type MERGE to add this backup, or OVERWRITE to replace current data.", "merge");
+        if (answer === null) {
+          showToast("Import cancelled");
+          return null;
+        }
+        answer = answer.trim().toLowerCase();
+        if (answer === "m") {
+          answer = "merge";
+        }
+        if (answer === "o") {
+          answer = "overwrite";
+        }
+        if (answer !== "merge" && answer !== "overwrite") {
+          showToast("Import cancelled");
+          return null;
+        }
+        return answer;
+      }
+
+      function parseBackupData(raw) {
+        var parsed = JSON.parse(raw);
+        var data = parsed.data || parsed;
+        if (!Array.isArray(data.players) || !Array.isArray(data.games)) {
+          throw new Error("Bad backup");
+        }
+        return {
+          players: clone(data.players),
+          games: clone(data.games),
+          settings: data.settings ? clone(data.settings) : null
+        };
+      }
+
+      function applyImportedBackup(data, mode) {
+        var result = {
+          players: data.players.length,
+          games: data.games.length
+        };
+        if (mode === "merge") {
+          result = mergeImportedBackup(data);
+          state.settings = Object.assign({}, state.settings, data.settings || {});
+        } else {
           state.players = data.players;
           state.games = data.games;
           state.settings = data.settings || state.settings;
-          state.lastTeams = null;
-          state.draft = clone(DEFAULT_STATE.draft);
-          normalizeState();
-          saveAndRender();
+        }
+        state.lastTeams = null;
+        state.draft = clone(DEFAULT_STATE.draft);
+        normalizeState();
+        saveAndRender();
+        return result;
+      }
+
+      function mergeImportedBackup(data) {
+        var result = { players: 0, games: 0 };
+        var playerById = {};
+        var playerByName = {};
+        var idMap = {};
+        state.players.forEach(function (player) {
+          playerById[player.id] = player;
+          playerByName[player.name.toLowerCase()] = player;
+        });
+
+        data.players.forEach(function (imported) {
+          var oldId = String(imported.id || uid("p"));
+          var name = String(imported.name || "Player").trim() || "Player";
+          var existing = playerById[oldId] || playerByName[name.toLowerCase()];
+          if (existing) {
+            idMap[oldId] = existing.id;
+            if (imported.active !== false) {
+              existing.active = true;
+            }
+            return;
+          }
+          var nextId = oldId;
+          while (playerById[nextId]) {
+            nextId = uid("p");
+          }
+          var player = {
+            id: nextId,
+            name: name,
+            active: imported.active !== false
+          };
+          state.players.push(player);
+          playerById[player.id] = player;
+          playerByName[player.name.toLowerCase()] = player;
+          idMap[oldId] = player.id;
+          result.players += 1;
+        });
+
+        var gameById = {};
+        state.games.forEach(function (game) {
+          gameById[game.id] = true;
+        });
+        data.games.forEach(function (imported) {
+          var game = clone(imported);
+          game.id = game.id || uid("g");
+          if (gameById[game.id]) {
+            return;
+          }
+          game.teamA = Array.isArray(game.teamA) ? game.teamA.map(function (id) { return idMap[id] || id; }) : [];
+          game.teamB = Array.isArray(game.teamB) ? game.teamB.map(function (id) { return idMap[id] || id; }) : [];
+          state.games.push(game);
+          gameById[game.id] = true;
+          result.games += 1;
+        });
+
+        state.players.sort(function (a, b) {
+          return a.name.localeCompare(b.name);
+        });
+        return result;
+      }
+
+      function restoreBackup() {
+        if (importBackupText(els.backupJson.value, false)) {
           els.backupJson.value = "";
-          showToast("Backup restored");
-        } catch (error) {
-          showToast("Invalid JSON");
         }
       }
 

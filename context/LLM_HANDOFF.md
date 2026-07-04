@@ -121,12 +121,12 @@ with the title double-quoted.
   `APP_VERSION`.
 - Docs: `README.md` (public/run/build), this handoff (all dev + LLM context),
   `AGENTS.md` + `CLAUDE.md` (thin auto-loaded summaries).
-- Current version: `APP_VERSION = "1.0.0.6"` - active build line,
-  "Quick Switch": restores the symbol-only screen toolbar for Play, Rankings,
-  Games, and Data while keeping Play active through Players, Matchups, Score,
-  and Game Saved. The prior "Next Rally" flow remains: matchup cards stack each
-  team's two players vertically, Score view uses compact iPhone-fit styling,
-  and saving a game opens Same Teams / Different Matchup / New Group choices.
+- Current version: `APP_VERSION = "1.0.0.7"` - active build line,
+  "Thumb Reach": Players uses one-line rows with games and W-L record, search
+  lives in a sticky bottom add/search bar, the title bar exposes JSON import and
+  export buttons, and JSON file imports ask for merge or overwrite. The prior
+  "Quick Switch" toolbar remains for Play, Rankings, Games, and Data, with Play
+  active through Players, Matchups, Score, and Game Saved.
 - User data lives in browser localStorage. Export/import support uses text,
   CSV, and JSON backup flows. The app should continue to run over `file://`.
 - No backend, bundler, package manager, or runtime dependencies.
@@ -136,8 +136,8 @@ with the title double-quoted.
   concurrency group, stages a full `_site` artifact, preserves other published
   channel folders from the `gh-pages` snapshot branch, saves the refreshed
   snapshot back to `gh-pages`, then deploys with `actions/deploy-pages`.
-- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.6
-  "Quick Switch".
+- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.7
+  "Thumb Reach".
 
 ## Rules
 
