@@ -1,5 +1,26 @@
 const CHANGELOG = [
   {
+    version: "1.0.0.6",
+    date: "2026-07-04",
+    title: "Quick Switch",
+    summary: "The main screen toolbar is back for one-tap movement between app areas.",
+    highlights: [
+      "Restored the four-button screen toolbar below the top bar.",
+      "Kept Play active through Players, Matchups, Score, and Game Saved.",
+      "Added symbol-only shortcuts for Rankings, Games, and Data.",
+      "Kept the score screen compact with the toolbar visible."
+    ],
+    updateSections: [
+      {
+        heading: "Navigation",
+        items: [
+          "Added direct toolbar access to Play, Rankings, Games, and Data.",
+          "The Play tab stays selected throughout the active game-entry flow."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0.0.5",
     date: "2026-07-04",
     title: "Next Rally",
