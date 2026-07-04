@@ -522,6 +522,30 @@
       gap: 12px;
     }
 
+    .score-only {
+      display: grid;
+      gap: 12px;
+    }
+
+    .score-panel.win-only .score-only {
+      display: none;
+    }
+
+    .win-only-note {
+      display: none;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      color: var(--muted);
+      background: var(--panel);
+      padding: 12px;
+      line-height: 1.35;
+      font-weight: 750;
+    }
+
+    .score-panel.win-only .win-only-note {
+      display: block;
+    }
+
     .score-grid {
       display: grid;
       grid-template-columns: 56px 1fr 56px 56px 1fr 56px;
@@ -707,19 +731,19 @@
 
     .matchup-list {
       display: grid;
-      gap: 10px;
+      gap: 12px;
     }
 
     .matchup-option {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       align-items: stretch;
-      gap: 8px;
+      gap: 10px;
       width: 100%;
-      min-height: 92px;
+      min-height: 128px;
       border: 1px solid var(--line);
       background: var(--panel);
-      padding: 10px;
+      padding: 12px;
       text-align: left;
     }
 
@@ -730,12 +754,14 @@
 
     .matchup-team {
       display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       align-content: center;
-      gap: 4px;
+      gap: 8px;
       min-width: 0;
     }
 
     .matchup-team-label {
+      grid-column: 1 / -1;
       color: var(--muted);
       font-size: 0.72rem;
       font-weight: 900;
@@ -743,19 +769,28 @@
     }
 
     .matchup-player {
+      display: grid;
       min-width: 0;
+      min-height: 62px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      padding: 8px;
       overflow: hidden;
       color: var(--text);
+      font-size: 1.08rem;
       font-weight: 850;
+      text-align: center;
       text-overflow: ellipsis;
-      white-space: nowrap;
+      overflow-wrap: anywhere;
     }
 
     .matchup-vs {
       display: grid;
       align-self: center;
-      min-width: 34px;
-      min-height: 34px;
+      min-width: 42px;
+      min-height: 42px;
       place-items: center;
       border-radius: 999px;
       color: #06110b;
@@ -1347,11 +1382,14 @@
       }
 
       .matchup-option {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 6px;
+        padding: 8px;
       }
 
       .matchup-vs {
-        justify-self: start;
+        min-width: 34px;
+        min-height: 34px;
       }
 
       .setting-row,
@@ -1427,27 +1465,34 @@
         <button type="button" id="rematch">Rematch</button>
       </div>
 
-      <div class="panel score-panel">
+      <div class="panel score-panel" id="scorePanel">
         <div class="panel-header">
-          <h2>Score</h2>
+          <h2>Result</h2>
+          <div class="segmented two" role="group" aria-label="Score recording mode">
+            <button type="button" data-score-mode="score" class="active">Score</button>
+            <button type="button" data-score-mode="win">Win Only</button>
+          </div>
+        </div>
+        <div class="score-only">
           <div class="segmented three" role="group" aria-label="Winning score">
             <button type="button" data-win-score="11" class="active">11</button>
             <button type="button" data-win-score="15">15</button>
             <button type="button" data-win-score="21">21</button>
           </div>
+          <div class="score-grid" aria-label="Manual score controls">
+            <button type="button" data-score-step="A:-1" aria-label="Team A minus one">-</button>
+            <div class="score-number" id="scoreA">11</div>
+            <button type="button" data-score-step="A:1" aria-label="Team A plus one">+</button>
+            <button type="button" data-score-step="B:-1" aria-label="Team B minus one">-</button>
+            <div class="score-number" id="scoreB">9</div>
+            <button type="button" data-score-step="B:1" aria-label="Team B plus one">+</button>
+          </div>
+          <div>
+            <h3>Loser Score</h3>
+            <div class="loser-grid" id="loserGrid"></div>
+          </div>
         </div>
-        <div class="score-grid" aria-label="Manual score controls">
-          <button type="button" data-score-step="A:-1" aria-label="Team A minus one">-</button>
-          <div class="score-number" id="scoreA">11</div>
-          <button type="button" data-score-step="A:1" aria-label="Team A plus one">+</button>
-          <button type="button" data-score-step="B:-1" aria-label="Team B minus one">-</button>
-          <div class="score-number" id="scoreB">9</div>
-          <button type="button" data-score-step="B:1" aria-label="Team B plus one">+</button>
-        </div>
-        <div>
-          <h3>Loser Score</h3>
-          <div class="loser-grid" id="loserGrid"></div>
-        </div>
+        <p class="win-only-note">Choose the winning team above, then save the win without point totals.</p>
         <button class="save-button" id="saveGame" type="button">Save Game</button>
       </div>
     </section>
@@ -1632,7 +1677,7 @@
     (function () {
       "use strict";
 
-      var APP_VERSION = "1.0.0.3";
+      var APP_VERSION = "1.0.0.4";
       var STORAGE_KEY = "pickle-score-state-v1";
       var INSTALL_ICON_KEY = "psInstallIconVariant";
       var DEFAULT_STATE = {
@@ -1650,6 +1695,7 @@
           teamB: [],
           focus: null,
           winner: "A",
+          scoreMode: "score",
           winScore: 11,
           loserScore: 9,
           scoreA: 11,
@@ -1690,6 +1736,7 @@
         matchupsBack: document.getElementById("matchupsBack"),
         teamBoard: document.getElementById("teamBoard"),
         scoreBack: document.getElementById("scoreBack"),
+        scorePanel: document.getElementById("scorePanel"),
         clearDraft: document.getElementById("clearDraft"),
         swapTeams: document.getElementById("swapTeams"),
         rematch: document.getElementById("rematch"),
@@ -1811,6 +1858,16 @@
           });
         });
 
+        document.querySelectorAll("[data-score-mode]").forEach(function (button) {
+          button.addEventListener("click", function () {
+            state.draft.scoreMode = button.dataset.scoreMode === "win" ? "win" : "score";
+            if (state.draft.scoreMode === "score") {
+              syncScoreFromQuick();
+            }
+            saveAndRender();
+          });
+        });
+
         els.playersGo.addEventListener("click", openMatchups);
         els.matchupsBack.addEventListener("click", function () {
           showView("players");
@@ -1830,7 +1887,9 @@
           var winner = event.target.closest("[data-winner]");
           if (winner) {
             state.draft.winner = winner.dataset.winner;
-            syncScoreFromQuick();
+            if (state.draft.scoreMode === "score") {
+              syncScoreFromQuick();
+            }
             saveAndRender();
           }
         });
@@ -2030,6 +2089,7 @@
         state.draft.teamB = Array.isArray(state.draft.teamB) ? state.draft.teamB : [];
         state.draft.mode = state.draft.mode === "singles" ? "singles" : "doubles";
         state.draft.winner = state.draft.winner === "B" ? "B" : "A";
+        state.draft.scoreMode = state.draft.scoreMode === "win" ? "win" : "score";
         state.draft.winScore = [11, 15, 21].indexOf(Number(state.draft.winScore)) >= 0 ? Number(state.draft.winScore) : 11;
         state.draft.loserScore = clamp(Number(state.draft.loserScore) || 0, 0, state.draft.winScore - 1);
         state.draft.scoreA = clamp(Number(state.draft.scoreA) || 0, 0, 99);
@@ -2044,8 +2104,16 @@
           game.mode = game.mode === "singles" ? "singles" : "doubles";
           game.teamA = Array.isArray(game.teamA) ? game.teamA : [];
           game.teamB = Array.isArray(game.teamB) ? game.teamB : [];
-          game.scoreA = Number(game.scoreA) || 0;
-          game.scoreB = Number(game.scoreB) || 0;
+          game.scoreRecorded = game.scoreRecorded === false ? false : true;
+          if (game.scoreRecorded) {
+            game.scoreA = Number(game.scoreA) || 0;
+            game.scoreB = Number(game.scoreB) || 0;
+            game.winner = game.scoreA > game.scoreB ? "A" : "B";
+          } else {
+            game.scoreA = null;
+            game.scoreB = null;
+            game.winner = game.winner === "B" ? "B" : "A";
+          }
           game.playedAt = game.playedAt || new Date().toISOString();
         });
         state.draft.selectedPlayers = uniqueExistingIds(state.draft.selectedPlayers).slice(0, 4);
@@ -2398,6 +2466,31 @@
         }).join(" / ");
       }
 
+      function hasRecordedScore(game) {
+        return !game || game.scoreRecorded !== false;
+      }
+
+      function gameWinner(game) {
+        if (game && (game.winner === "A" || game.winner === "B")) {
+          return game.winner;
+        }
+        return game && game.scoreB > game.scoreA ? "B" : "A";
+      }
+
+      function gameScoreLabel(game) {
+        if (!hasRecordedScore(game)) {
+          return "Win";
+        }
+        return gameWinner(game) === "A" ? game.scoreA + "-" + game.scoreB : game.scoreB + "-" + game.scoreA;
+      }
+
+      function gameTeamScore(game, team) {
+        if (!hasRecordedScore(game)) {
+          return 0;
+        }
+        return team === "A" ? game.scoreA : game.scoreB;
+      }
+
       function selectedPlayerIds() {
         return uniqueExistingIds(state.draft.selectedPlayers || []).slice(0, 4);
       }
@@ -2592,6 +2685,12 @@
 
       function draftReady() {
         var size = teamSize();
+        if (state.draft.teamA.length !== size || state.draft.teamB.length !== size) {
+          return false;
+        }
+        if (state.draft.scoreMode === "win") {
+          return true;
+        }
         return state.draft.teamA.length === size &&
           state.draft.teamB.length === size &&
           state.draft.scoreA !== state.draft.scoreB;
@@ -2602,6 +2701,8 @@
           showToast(saveButtonText());
           return;
         }
+        var scoreRecorded = state.draft.scoreMode !== "win";
+        var winner = scoreRecorded ? (state.draft.scoreA > state.draft.scoreB ? "A" : "B") : state.draft.winner;
         var game = {
           id: uid("g"),
           playedAt: new Date().toISOString(),
@@ -2610,8 +2711,10 @@
           teamB: state.draft.teamB.slice(0, teamSize()),
           teamANames: state.draft.teamA.map(function (id) { return playerName(id); }),
           teamBNames: state.draft.teamB.map(function (id) { return playerName(id); }),
-          scoreA: state.draft.scoreA,
-          scoreB: state.draft.scoreB
+          scoreRecorded: scoreRecorded,
+          winner: winner,
+          scoreA: scoreRecorded ? state.draft.scoreA : null,
+          scoreB: scoreRecorded ? state.draft.scoreB : null
         };
         state.games.push(game);
         state.lastTeams = {
@@ -2627,6 +2730,9 @@
         var size = teamSize();
         if (state.draft.teamA.length < size || state.draft.teamB.length < size) {
           return "Pick players";
+        }
+        if (state.draft.scoreMode === "win") {
+          return "Save Win";
         }
         if (state.draft.scoreA === state.draft.scoreB) {
           return "Score tied";
@@ -2745,10 +2851,17 @@
         document.querySelectorAll("[data-win-score]").forEach(function (button) {
           button.classList.toggle("active", Number(button.dataset.winScore) === state.draft.winScore);
         });
+        document.querySelectorAll("[data-score-mode]").forEach(function (button) {
+          button.classList.toggle("active", button.dataset.scoreMode === state.draft.scoreMode);
+          button.setAttribute("aria-pressed", button.dataset.scoreMode === state.draft.scoreMode);
+        });
       }
 
       function renderTeams() {
-        var score = { A: state.draft.scoreA, B: state.draft.scoreB };
+        var score = {
+          A: state.draft.scoreMode === "win" ? (state.draft.winner === "A" ? "W" : "L") : state.draft.scoreA,
+          B: state.draft.scoreMode === "win" ? (state.draft.winner === "B" ? "W" : "L") : state.draft.scoreB
+        };
         els.teamBoard.innerHTML = ["A", "B"].map(function (team) {
           var ids = team === "A" ? state.draft.teamA : state.draft.teamB;
           var slots = [];
@@ -2775,6 +2888,7 @@
       function renderScore() {
         els.scoreA.textContent = state.draft.scoreA;
         els.scoreB.textContent = state.draft.scoreB;
+        els.scorePanel.classList.toggle("win-only", state.draft.scoreMode === "win");
         var scores = [];
         for (var i = 0; i < state.draft.winScore; i += 1) {
           scores.push(
@@ -2783,7 +2897,7 @@
         }
         els.loserGrid.innerHTML = scores.join("");
         els.saveGame.disabled = !draftReady();
-        setIconButton(els.saveGame, draftReady() ? "check" : "warning", draftReady() ? "Save game" : saveButtonText());
+        setIconButton(els.saveGame, draftReady() ? "check" : "warning", saveButtonText());
         els.saveGame.classList.toggle("warning", !draftReady());
       }
 
@@ -2886,17 +3000,19 @@
           game.teamA.forEach(function (id) { ensure(id, playerName(id, game, "A")); });
           game.teamB.forEach(function (id) { ensure(id, playerName(id, game, "B")); });
 
+          var scoreA = gameTeamScore(game, "A");
+          var scoreB = gameTeamScore(game, "B");
           var ratingA = average(game.teamA.map(function (id) { return ensure(id).rating; }));
           var ratingB = average(game.teamB.map(function (id) { return ensure(id).rating; }));
           var expectedA = 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
-          var resultA = game.scoreA > game.scoreB ? 1 : 0;
-          var margin = Math.abs(game.scoreA - game.scoreB);
-          var topScore = Math.max(game.scoreA, game.scoreB, 1);
+          var resultA = gameWinner(game) === "A" ? 1 : 0;
+          var margin = Math.abs(scoreA - scoreB);
+          var topScore = Math.max(scoreA, scoreB, 1);
           var k = 24 * Math.min(1.75, 1 + margin / (topScore * 2));
           var deltaA = k * (resultA - expectedA);
 
-          applyGameStats(game.teamA, game.scoreA, game.scoreB, resultA === 1, deltaA);
-          applyGameStats(game.teamB, game.scoreB, game.scoreA, resultA === 0, -deltaA);
+          applyGameStats(game.teamA, scoreA, scoreB, resultA === 1, deltaA);
+          applyGameStats(game.teamB, scoreB, scoreA, resultA === 0, -deltaA);
         });
 
         var players = Array.from(map.values()).map(function (item) {
@@ -2929,8 +3045,8 @@
       function buildPairStats() {
         var pairs = new Map();
         state.games.forEach(function (game) {
-          addPair(game.teamA, game.scoreA, game.scoreB, game);
-          addPair(game.teamB, game.scoreB, game.scoreA, game);
+          addPair(game.teamA, gameTeamScore(game, "A"), gameTeamScore(game, "B"), gameWinner(game) === "A", game);
+          addPair(game.teamB, gameTeamScore(game, "B"), gameTeamScore(game, "A"), gameWinner(game) === "B", game);
         });
         return Array.from(pairs.values()).map(function (pair) {
           pair.winRate = pair.games ? pair.wins / pair.games : 0;
@@ -2939,7 +3055,7 @@
           return b.winRate - a.winRate || b.games - a.games || b.diff - a.diff || a.name.localeCompare(b.name);
         });
 
-        function addPair(ids, pf, pa, game) {
+        function addPair(ids, pf, pa, won, game) {
           if (ids.length !== 2) {
             return;
           }
@@ -2956,8 +3072,8 @@
           }
           var pair = pairs.get(key);
           pair.games += 1;
-          pair.wins += pf > pa ? 1 : 0;
-          pair.losses += pf > pa ? 0 : 1;
+          pair.wins += won ? 1 : 0;
+          pair.losses += won ? 0 : 1;
           pair.diff += pf - pa;
         }
       }
@@ -3017,10 +3133,10 @@
           return;
         }
         els.gameList.innerHTML = state.games.slice().reverse().map(function (game) {
-          var aWon = game.scoreA > game.scoreB;
-          var winnerName = aWon ? teamNames(game.teamA, game, "A") : teamNames(game.teamB, game, "B");
-          var loserName = aWon ? teamNames(game.teamB, game, "B") : teamNames(game.teamA, game, "A");
-          var score = aWon ? game.scoreA + "-" + game.scoreB : game.scoreB + "-" + game.scoreA;
+          var winner = gameWinner(game);
+          var winnerName = winner === "A" ? teamNames(game.teamA, game, "A") : teamNames(game.teamB, game, "B");
+          var loserName = winner === "A" ? teamNames(game.teamB, game, "B") : teamNames(game.teamA, game, "A");
+          var score = gameScoreLabel(game);
           return (
             "<div class=\"game-row\">" +
               "<div class=\"game-main\">" +
@@ -3109,10 +3225,10 @@
         lines.push("Games");
         if (state.games.length) {
           state.games.slice().reverse().forEach(function (game) {
-            var aWon = game.scoreA > game.scoreB;
-            var winnerName = aWon ? teamNames(game.teamA, game, "A") : teamNames(game.teamB, game, "B");
-            var loserName = aWon ? teamNames(game.teamB, game, "B") : teamNames(game.teamA, game, "A");
-            var score = aWon ? game.scoreA + "-" + game.scoreB : game.scoreB + "-" + game.scoreA;
+            var winner = gameWinner(game);
+            var winnerName = winner === "A" ? teamNames(game.teamA, game, "A") : teamNames(game.teamB, game, "B");
+            var loserName = winner === "A" ? teamNames(game.teamB, game, "B") : teamNames(game.teamA, game, "A");
+            var score = gameScoreLabel(game);
             lines.push(formatDateLong(game.playedAt) + " - " + winnerName + " def " + loserName + " " + score);
           });
         } else {
@@ -3125,6 +3241,7 @@
         var rows = [[
           "played_at",
           "mode",
+          "score_recorded",
           "team_a",
           "team_b",
           "score_a",
@@ -3133,16 +3250,17 @@
           "margin"
         ]];
         state.games.forEach(function (game) {
-          var aWon = game.scoreA > game.scoreB;
+          var winner = gameWinner(game);
           rows.push([
             game.playedAt,
             game.mode,
+            hasRecordedScore(game) ? "yes" : "no",
             teamNames(game.teamA, game, "A"),
             teamNames(game.teamB, game, "B"),
             game.scoreA,
             game.scoreB,
-            aWon ? teamNames(game.teamA, game, "A") : teamNames(game.teamB, game, "B"),
-            Math.abs(game.scoreA - game.scoreB)
+            winner === "A" ? teamNames(game.teamA, game, "A") : teamNames(game.teamB, game, "B"),
+            hasRecordedScore(game) ? Math.abs(game.scoreA - game.scoreB) : ""
           ]);
         });
         return rows.map(function (row) {
