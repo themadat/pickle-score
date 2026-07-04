@@ -117,6 +117,43 @@
       opacity: 0.45;
     }
 
+    .sf-symbol {
+      display: block;
+      width: 1em;
+      height: 1em;
+      fill: currentColor;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .icon-button {
+      display: inline-grid;
+      min-width: 44px;
+      width: 44px;
+      min-height: 44px;
+      padding: 0;
+      place-items: center;
+      line-height: 1;
+    }
+
+    .icon-button .button-symbol {
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .icon-button .sf-symbol {
+      width: 20px;
+      height: 20px;
+    }
+
     input,
     textarea {
       width: 100%;
@@ -251,6 +288,12 @@
       font-weight: 800;
     }
 
+    .top-actions .icon-button {
+      min-width: 40px;
+      width: 40px;
+      min-height: 38px;
+    }
+
     .tabs {
       position: sticky;
       top: 0;
@@ -270,6 +313,12 @@
       background: transparent;
       border: 1px solid transparent;
       font-weight: 700;
+    }
+
+    .tab.icon-button {
+      width: 100%;
+      min-width: 0;
+      min-height: 42px;
     }
 
     .tab.active {
@@ -423,6 +472,11 @@
       font-weight: 800;
     }
 
+    .winner-button.icon-button {
+      width: 100%;
+      min-width: 0;
+    }
+
     .winner-button.active {
       color: #06110b;
       border-color: var(--accent);
@@ -445,6 +499,12 @@
       border: 1px solid var(--line);
       background: var(--panel);
       font-weight: 750;
+    }
+
+    .actions .icon-button {
+      width: 100%;
+      min-width: 0;
+      min-height: 40px;
     }
 
     .score-panel {
@@ -533,6 +593,15 @@
       font-weight: 900;
     }
 
+    .save-button.icon-button {
+      width: 100%;
+    }
+
+    .save-button.icon-button .sf-symbol {
+      width: 24px;
+      height: 24px;
+    }
+
     :root[data-theme="light"] .save-button {
       color: #ffffff;
     }
@@ -548,6 +617,10 @@
       grid-template-columns: 1fr auto;
       gap: 8px;
       margin-bottom: 10px;
+    }
+
+    .roster-tools .icon-button {
+      flex: 0 0 auto;
     }
 
     .roster-grid {
@@ -654,6 +727,11 @@
       font-weight: 900;
     }
 
+    .delete-button.icon-button {
+      width: 44px;
+      min-height: 36px;
+    }
+
     .ranking-row {
       grid-template-columns: 34px 1fr auto;
       align-items: center;
@@ -719,6 +797,13 @@
       font-weight: 750;
     }
 
+    .player-row .icon-button {
+      width: 38px;
+      min-width: 38px;
+      min-height: 36px;
+      padding: 0;
+    }
+
     .tools {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -730,6 +815,11 @@
       border: 1px solid var(--line);
       background: var(--panel-2);
       font-weight: 800;
+    }
+
+    .tools .icon-button {
+      width: 100%;
+      min-width: 0;
     }
 
     .tools .primary {
@@ -780,6 +870,12 @@
       background: var(--panel-2);
       color: var(--muted);
       font-weight: 800;
+    }
+
+    .dialog-close.icon-button {
+      width: 38px;
+      min-width: 38px;
+      min-height: 36px;
     }
 
     .dialog-body {
@@ -849,6 +945,12 @@
       font-weight: 800;
     }
 
+    .settings-actions .icon-button {
+      width: 42px;
+      min-width: 42px;
+      min-height: 38px;
+    }
+
     .theme-choice {
       display: grid;
       grid-template-columns: repeat(2, minmax(74px, 1fr));
@@ -865,6 +967,12 @@
       background: transparent;
       color: var(--muted);
       font-weight: 850;
+    }
+
+    .theme-choice .icon-button {
+      width: 100%;
+      min-width: 0;
+      min-height: 34px;
     }
 
     .theme-choice button.active {
@@ -1383,13 +1491,14 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="assets/js/icons.js"></script>
   <script src="assets/js/changelog.js"></script>
   <script src="assets/js/roadmap.js"></script>
   <script>
     (function () {
       "use strict";
 
-      var APP_VERSION = "1.0.0.1";
+      var APP_VERSION = "1.0.0.2";
       var STORAGE_KEY = "pickle-score-state-v1";
       var INSTALL_ICON_KEY = "psInstallIconVariant";
       var DEFAULT_STATE = {
@@ -1481,6 +1590,7 @@
       function init() {
         normalizeState();
         bindEvents();
+        renderStaticButtonIcons();
         applyTheme();
         syncScoreFromQuick();
         renderAll();
@@ -1817,10 +1927,85 @@
           .replace(/'/g, "&#39;");
       }
 
+      function iconSvg(name) {
+        return window.PS_ICONS && window.PS_ICONS[name] ? window.PS_ICONS[name] : "";
+      }
+
+      function iconContent(iconName, label) {
+        var svg = iconSvg(iconName);
+        if (!svg) {
+          return esc(label);
+        }
+        return "<span class=\"button-symbol\" aria-hidden=\"true\">" + svg + "</span><span class=\"sr-only\">" + esc(label) + "</span>";
+      }
+
+      function setIconButton(button, iconName, label) {
+        if (!button) {
+          return;
+        }
+        button.classList.add("icon-button");
+        button.innerHTML = iconContent(iconName, label);
+        button.setAttribute("aria-label", label);
+        button.title = label;
+      }
+
+      function iconButtonHtml(className, attrs, iconName, label) {
+        var classes = ((className || "") + " icon-button").trim();
+        return (
+          "<button class=\"" + esc(classes) + "\" type=\"button\"" +
+          (attrs ? " " + attrs : "") +
+          " aria-label=\"" + esc(label) + "\" title=\"" + esc(label) + "\">" +
+          iconContent(iconName, label) +
+          "</button>"
+        );
+      }
+
+      function renderStaticButtonIcons() {
+        var tabIcons = {
+          record: "play",
+          rank: "chart",
+          games: "list",
+          data: "data"
+        };
+        var tabLabels = {
+          record: "Record",
+          rank: "Rank",
+          games: "Games",
+          data: "Data"
+        };
+        els.tabs.forEach(function (tab) {
+          setIconButton(tab, tabIcons[tab.dataset.view] || "list", tabLabels[tab.dataset.view] || "Open view");
+        });
+        setIconButton(els.addToHomeBtn, "addApp", "Add as App");
+        setIconButton(els.settingsBtn, "settings", "Settings");
+        setIconButton(els.clearDraft, "clear", "Clear teams");
+        setIconButton(els.swapTeams, "swap", "Swap teams");
+        setIconButton(els.rematch, "arrowClockwise", "Rematch");
+        setIconButton(els.quickAddForm.querySelector("button[type=\"submit\"]"), "addPlayer", "Add player");
+        setIconButton(els.undoLast, "arrowCounterclockwise", "Undo last game");
+        setIconButton(els.importPlayers, "addPlayer", "Add names");
+        setIconButton(els.clearInactive, "textMinus", "Clear hidden players");
+        setIconButton(els.shareText, "share", "Share export");
+        setIconButton(els.copyText, "copy", "Copy export");
+        setIconButton(els.downloadText, "exportFile", "Download text");
+        setIconButton(els.downloadCsv, "chart", "Download CSV");
+        setIconButton(els.downloadJson, "backup", "Download JSON");
+        setIconButton(els.selectExport, "select", "Select export");
+        setIconButton(els.restoreBackup, "restore", "Restore backup");
+        setIconButton(els.wipeData, "wipe", "Wipe data");
+        document.querySelectorAll("[data-close-dialog]").forEach(function (button) {
+          setIconButton(button, "close", "Close");
+        });
+      }
+
       function applyTheme() {
         els.html.dataset.theme = state.settings.theme;
         els.appIcon.src = state.settings.theme === "dark" ? "assets/icons/icon-192-dark.png" : "assets/icons/icon-192.png";
-        els.themeToggle.textContent = state.settings.theme === "dark" ? "Light" : "Dark";
+        setIconButton(
+          els.themeToggle,
+          state.settings.theme === "dark" ? "sun" : "moon",
+          state.settings.theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
+        );
         renderSettingsControls();
         updateVersionLabels();
       }
@@ -1832,6 +2017,10 @@
       }
 
       function renderSettingsControls() {
+        setIconButton(els.settingsLightBtn, "sun", "Light theme");
+        setIconButton(els.settingsDarkBtn, "moon", "Dark theme");
+        setIconButton(els.settingsInstallBtn, "addApp", "Add as App");
+        setIconButton(els.settingsDataBtn, "data", "Data tab");
         els.settingsLightBtn.classList.toggle("active", state.settings.theme === "light");
         els.settingsDarkBtn.classList.toggle("active", state.settings.theme === "dark");
         els.settingsLightBtn.setAttribute("aria-pressed", state.settings.theme === "light");
@@ -2382,7 +2571,7 @@
             "<div class=\"team " + (state.draft.winner === team ? "is-winner" : "") + "\">" +
               "<div class=\"team-title\"><span>Team " + team + "</span><span class=\"score-badge\">" + score[team] + "</span></div>" +
               "<div class=\"slots\">" + slots.join("") + "</div>" +
-              "<button type=\"button\" class=\"winner-button " + (state.draft.winner === team ? "active" : "") + "\" data-winner=\"" + team + "\">Team " + team + " Wins</button>" +
+              iconButtonHtml("winner-button " + (state.draft.winner === team ? "active" : ""), "data-winner=\"" + team + "\"", "trophy", "Team " + team + " wins") +
             "</div>"
           );
         }).join("");
@@ -2399,7 +2588,7 @@
         }
         els.loserGrid.innerHTML = scores.join("");
         els.saveGame.disabled = !draftReady();
-        els.saveGame.textContent = draftReady() ? "Save Game" : saveButtonText();
+        setIconButton(els.saveGame, draftReady() ? "check" : "warning", draftReady() ? "Save game" : saveButtonText());
         els.saveGame.classList.toggle("warning", !draftReady());
       }
 
@@ -2599,7 +2788,7 @@
               "</div>" +
               "<div class=\"row\">" +
                 "<div class=\"game-score\">" + score + "</div>" +
-                "<button class=\"delete-button\" type=\"button\" data-delete-game=\"" + esc(game.id) + "\">x</button>" +
+                iconButtonHtml("delete-button", "data-delete-game=\"" + esc(game.id) + "\"", "trash", "Delete game") +
               "</div>" +
             "</div>"
           );
@@ -2615,8 +2804,8 @@
           return (
             "<div class=\"player-row\">" +
               "<div class=\"player-name\">" + esc(player.name) + (player.active ? "" : " <span class=\"muted\">hidden</span>") + "</div>" +
-              "<button type=\"button\" data-edit-player=\"" + esc(player.id) + "\">Edit</button>" +
-              "<button type=\"button\" data-hide-player=\"" + esc(player.id) + "\">" + (player.active ? "Hide" : "Show") + "</button>" +
+              iconButtonHtml("", "data-edit-player=\"" + esc(player.id) + "\"", "edit", "Edit " + player.name) +
+              iconButtonHtml("", "data-hide-player=\"" + esc(player.id) + "\"", player.active ? "textMinus" : "eye", (player.active ? "Hide " : "Show ") + player.name) +
             "</div>"
           );
         }).join("") : "<div class=\"empty\">No players yet</div>";

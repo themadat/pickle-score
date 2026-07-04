@@ -114,21 +114,22 @@ with the title double-quoted.
 ## Snapshot
 
 - Pickle Score is a local-first HTML/CSS/JS app with no build step. The app is
-  currently a single `index.html`; companion files in `assets/js/` hold release
-  notes (`CHANGELOG`) and roadmap seeds (`WISHLIST_SEEDS`) for future app
-  surfaces and planning.
+  currently centered on `index.html`; companion files in `assets/js/` hold icon
+  constants (`PS_ICONS`), release notes (`CHANGELOG`), and roadmap seeds
+  (`WISHLIST_SEEDS`) for future app surfaces and planning.
 - Main file: `index.html`. `STORAGE_KEY = "pickle-score-state-v1"`, version in
   `APP_VERSION`.
 - Docs: `README.md` (public/run/build), this handoff (all dev + LLM context),
   `AGENTS.md` + `CLAUDE.md` (thin auto-loaded summaries).
-- Current version: `APP_VERSION = "1.0.0.1"` - active build line,
-  "Home Court": top-bar app icon, Add as App dialog with persisted light/dark
-  install icon choice and device directions, Settings dialog, and version pills.
+- Current version: `APP_VERSION = "1.0.0.2"` - active build line,
+  "Symbol Serve": top-bar app icon, Add as App dialog with persisted light/dark
+  install icon choice and device directions, Settings dialog, version pills,
+  Visit Tracker-style icon constants, and symbol-only command buttons.
 - User data lives in browser localStorage. Export/import support uses text,
   CSV, and JSON backup flows. The app should continue to run over `file://`.
 - No backend, bundler, package manager, or runtime dependencies.
-- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.1
-  "Home Court".
+- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.2
+  "Symbol Serve".
 
 ## Rules
 
