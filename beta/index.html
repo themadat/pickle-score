@@ -52,7 +52,8 @@
       --shadow: rgba(0, 0, 0, 0.35);
       --radius: 8px;
       --keyboard-offset: 0px;
-      --player-dock-bottom: calc(var(--keyboard-offset) + max(10px, env(safe-area-inset-bottom)));
+      --tabbar-space: calc(52px + max(8px, env(safe-area-inset-bottom)));
+      --player-dock-bottom: calc(var(--keyboard-offset) + var(--tabbar-space) + 8px);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
@@ -184,7 +185,7 @@
     .app {
       width: min(100%, 760px);
       margin: 0 auto;
-      padding: max(14px, env(safe-area-inset-top)) 12px max(20px, env(safe-area-inset-bottom));
+      padding: max(14px, env(safe-area-inset-top)) 12px calc(var(--tabbar-space) + 12px);
     }
 
     .topbar {
@@ -298,16 +299,20 @@
     }
 
     .tabs {
-      position: sticky;
-      top: 0;
-      z-index: 5;
+      position: fixed;
+      left: max(0px, calc((100vw - 760px) / 2));
+      right: max(0px, calc((100vw - 760px) / 2));
+      bottom: 0;
+      z-index: 18;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 4px;
-      margin: 0 -2px 12px;
-      padding: 6px 2px;
+      margin: 0;
+      padding: 6px 8px max(8px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--line);
       background: var(--bg);
       backdrop-filter: blur(18px);
+      box-shadow: 0 -12px 30px var(--shadow);
     }
 
     .tab {
@@ -321,7 +326,7 @@
     .tab.icon-button {
       width: 100%;
       min-width: 0;
-      min-height: 42px;
+      min-height: 44px;
     }
 
     .tab.active {
@@ -1483,15 +1488,16 @@
 
     :root[data-view="score"] .app {
       display: grid;
-      grid-template-rows: auto auto minmax(0, 1fr);
-      min-height: 100dvh;
+      grid-template-rows: minmax(0, 1fr);
+      height: 100dvh;
+      min-height: 0;
       overflow: hidden;
-      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      padding-top: max(8px, env(safe-area-inset-top));
+      padding-bottom: calc(var(--tabbar-space) + 6px);
     }
 
     :root[data-view="score"] .topbar {
-      gap: 8px;
-      padding-bottom: 6px;
+      display: none;
     }
 
     :root[data-view="score"] .app-icon {
@@ -1508,14 +1514,12 @@
       display: none;
     }
 
-    :root[data-view="score"] .tabs {
-      position: static;
-      margin: 0 0 6px;
-      padding: 0;
+    :root[data-view="score"] .top-actions {
+      display: none;
     }
 
     :root[data-view="score"] .tab.icon-button {
-      min-height: 32px;
+      min-height: 42px;
     }
 
     :root[data-view="score"] .tab.icon-button .sf-symbol {
@@ -1524,13 +1528,16 @@
     }
 
     :root[data-view="score"] #view-score.view.active {
-      align-content: start;
-      gap: 6px;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      align-content: stretch;
+      height: 100%;
+      gap: 8px;
       min-height: 0;
       overflow: hidden;
     }
 
     :root[data-view="score"] #view-score .panel {
+      min-height: 0;
       padding: 8px;
     }
 
@@ -1544,6 +1551,8 @@
     }
 
     :root[data-view="score"] .team {
+      grid-template-columns: minmax(0, 1fr) 48px;
+      grid-template-rows: auto auto;
       gap: 6px;
       padding: 7px;
     }
@@ -1560,11 +1569,12 @@
     }
 
     :root[data-view="score"] .slots {
+      grid-column: 1;
       gap: 5px;
     }
 
     :root[data-view="score"] .slot {
-      min-height: 32px;
+      min-height: 30px;
       padding: 5px 7px;
       font-size: 0.9rem;
     }
@@ -1572,7 +1582,16 @@
     :root[data-view="score"] .winner-button,
     :root[data-view="score"] .winner-button.icon-button,
     :root[data-view="score"] .actions .icon-button {
-      min-height: 32px;
+      min-height: 44px;
+    }
+
+    :root[data-view="score"] .winner-button,
+    :root[data-view="score"] .winner-button.icon-button {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: stretch;
+      min-height: 88px;
+      height: 100%;
     }
 
     :root[data-view="score"] .actions {
@@ -1580,31 +1599,43 @@
     }
 
     :root[data-view="score"] .score-panel {
+      grid-template-rows: auto minmax(0, 1fr) auto;
       gap: 8px;
+      overflow: hidden;
     }
 
     :root[data-view="score"] .score-only {
+      grid-template-rows: auto auto auto;
       gap: 8px;
+      min-height: 0;
+    }
+
+    :root[data-view="score"] .score-only > div:last-child {
+      display: grid;
+      gap: 5px;
+      min-height: 0;
     }
 
     :root[data-view="score"] .segmented button {
-      min-height: 32px;
+      min-height: 42px;
       font-size: 0.9rem;
     }
 
     :root[data-view="score"] .score-grid {
-      grid-template-columns: 42px 1fr 42px 42px 1fr 42px;
-      gap: 5px;
+      grid-template-columns: 58px minmax(0, 1fr) 58px;
+      grid-template-rows: repeat(2, 54px);
+      gap: 6px;
+      min-height: 0;
     }
 
     :root[data-view="score"] .score-grid button {
-      min-height: 38px;
-      font-size: 1rem;
+      min-height: 54px;
+      font-size: 1.35rem;
     }
 
     :root[data-view="score"] .score-number {
-      min-height: 42px;
-      font-size: 1.55rem;
+      min-height: 54px;
+      font-size: 2rem;
     }
 
     :root[data-view="score"] h3 {
@@ -1612,22 +1643,30 @@
     }
 
     :root[data-view="score"] .loser-grid {
-      grid-template-columns: repeat(6, 1fr);
-      gap: 4px;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 5px;
     }
 
     :root[data-view="score"] .loser-grid button {
-      min-height: 30px;
-      font-size: 0.9rem;
+      min-height: 40px;
+      font-size: 0.95rem;
     }
 
     :root[data-view="score"] .win-only-note {
-      padding: 8px;
-      font-size: 0.82rem;
+      align-items: center;
+      justify-items: center;
+      min-height: 0;
+      padding: 12px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    :root[data-view="score"] .score-panel.win-only .win-only-note {
+      display: grid;
     }
 
     :root[data-view="score"] .save-button {
-      min-height: 44px;
+      min-height: 56px;
     }
 
     .muted {
@@ -1653,21 +1692,22 @@
       }
 
       .score-grid {
-        grid-template-columns: 46px 1fr 46px 46px 1fr 46px;
-        gap: 5px;
+        grid-template-columns: 54px minmax(0, 1fr) 54px;
+        grid-template-rows: repeat(2, minmax(58px, 1fr));
+        gap: 6px;
       }
 
       .score-grid button {
-        font-size: 1rem;
+        font-size: 1.25rem;
       }
 
       .score-number {
-        min-height: 54px;
-        font-size: 1.8rem;
+        min-height: 58px;
+        font-size: 1.95rem;
       }
 
       .loser-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(7, minmax(0, 1fr));
       }
 
       .actions {
@@ -1706,6 +1746,32 @@
       .setting-row,
       .install-top {
         grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-height: 720px) {
+      :root[data-view="score"] #view-score.view.active {
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+
+      :root[data-view="score"] #view-score > .panel:first-child .panel-header {
+        display: none;
+      }
+
+      :root[data-view="score"] #view-score > .panel:first-child {
+        padding: 6px;
+      }
+
+      :root[data-view="score"] .team {
+        padding: 6px;
+      }
+
+      :root[data-view="score"] #view-score > .actions {
+        display: none;
+      }
+
+      :root[data-view="score"] .loser-grid {
+        gap: 2px;
       }
     }
   </style>
@@ -2026,7 +2092,7 @@
     (function () {
       "use strict";
 
-      var APP_VERSION = "1.0.0.8";
+      var APP_VERSION = "1.0.0.9";
       var STORAGE_KEY = "pickle-score-state-v1";
       var INSTALL_ICON_KEY = "psInstallIconVariant";
       var DEFAULT_STATE = {

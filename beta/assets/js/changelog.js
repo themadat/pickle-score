@@ -1,5 +1,33 @@
 const CHANGELOG = [
   {
+    version: "1.0.0.9",
+    date: "2026-07-04",
+    title: "Bottom Bar",
+    summary: "Navigation and scoring controls are tuned for one-handed mobile use.",
+    highlights: [
+      "Moved the screen tabs to a fixed bottom bar.",
+      "Kept player search and Go above the bottom navigation.",
+      "Expanded score controls into larger two-row targets.",
+      "Kept the score screen fitted without scrolling."
+    ],
+    updateSections: [
+      {
+        heading: "Navigation",
+        items: [
+          "The Play, Rankings, Games, and Data tabs now sit at the bottom of the screen.",
+          "Bottom spacing keeps floating player controls clear of the tab bar."
+        ]
+      },
+      {
+        heading: "Scoring",
+        items: [
+          "The score entry controls now use larger plus, minus, loser-score, winner, and save targets.",
+          "The score screen reserves the available viewport for game entry without requiring page scroll."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0.0.8",
     date: "2026-07-04",
     title: "Fast Picks",
