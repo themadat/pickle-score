@@ -121,12 +121,9 @@ with the title double-quoted.
   `APP_VERSION`.
 - Docs: `README.md` (public/run/build), this handoff (all dev + LLM context),
   `AGENTS.md` + `CLAUDE.md` (thin auto-loaded summaries).
-- Current version: `APP_VERSION = "1.0.0.9"` - active build line,
-  "Bottom Bar": the main screen tabs are fixed at the bottom for thumb reach,
-  player search/Go float above that navigation, and the score screen uses
-  larger two-row score controls, bigger winner/loser/save targets, hidden score
-  chrome, and a no-scroll fitted layout. Very short score viewports also hide
-  the score header and utility row to keep 21-point scoring visible. The title
+- Current version: `APP_VERSION = "1.0.0.10"` - active build line,
+  "Dated Backups": JSON backup exports download as
+  `pickle-score-backup-yyyy-mm-dd.json` using the local export date. The title
   bar exposes JSON import/export, and JSON file imports ask for merge or
   overwrite.
 - User data lives in browser localStorage. Export/import support uses text,
@@ -138,8 +135,8 @@ with the title double-quoted.
   concurrency group, stages a full `_site` artifact, preserves other published
   channel folders from the `gh-pages` snapshot branch, saves the refreshed
   snapshot back to `gh-pages`, then deploys with `actions/deploy-pages`.
-- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.9
-  "Bottom Bar".
+- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.10
+  "Dated Backups".
 
 ## Rules
 
