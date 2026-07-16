@@ -121,11 +121,10 @@ with the title double-quoted.
   `APP_VERSION`.
 - Docs: `README.md` (public/run/build), this handoff (all dev + LLM context),
   `AGENTS.md` + `CLAUDE.md` (thin auto-loaded summaries).
-- Current version: `APP_VERSION = "1.0.0.10"` - active build line,
-  "Dated Backups": JSON backup exports download as
-  `pickle-score-backup-yyyy-mm-dd.json` using the local export date. The title
-  bar exposes JSON import/export, and JSON file imports ask for merge or
-  overwrite.
+- Current version: `APP_VERSION = "1.0.0.11"` - active build line,
+  "Channel Pills": beta and alpha deploy URLs show a matching channel pill next
+  to the version in the top bar and settings footer. The pill is inferred from
+  `/beta/` or `/alpha/` URL path segments; production/root stays untagged.
 - User data lives in browser localStorage. Export/import support uses text,
   CSV, and JSON backup flows. The app should continue to run over `file://`.
 - No backend, bundler, package manager, or runtime dependencies.
@@ -135,8 +134,8 @@ with the title double-quoted.
   concurrency group, stages a full `_site` artifact, preserves other published
   channel folders from the `gh-pages` snapshot branch, saves the refreshed
   snapshot back to `gh-pages`, then deploys with `actions/deploy-pages`.
-- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.10
-  "Dated Backups".
+- Latest public releases: 1.0.0 "First Serve". Active build: 1.0.0.11
+  "Channel Pills".
 
 ## Rules
 
