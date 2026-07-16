@@ -1,5 +1,22 @@
 const CHANGELOG = [
   {
+    version: "1.0.0.10",
+    date: "2026-07-16",
+    title: "Dated Backups",
+    summary: "JSON backup exports are easier to identify after download.",
+    highlights: [
+      "Added the export date to JSON backup filenames."
+    ],
+    updateSections: [
+      {
+        heading: "Backups",
+        items: [
+          "JSON backups now download as pickle-score-backup-yyyy-mm-dd.json."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0.0.9",
     date: "2026-07-04",
     title: "Bottom Bar",

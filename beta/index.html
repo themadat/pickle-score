@@ -2092,7 +2092,7 @@
     (function () {
       "use strict";
 
-      var APP_VERSION = "1.0.0.9";
+      var APP_VERSION = "1.0.0.10";
       var STORAGE_KEY = "pickle-score-state-v1";
       var INSTALL_ICON_KEY = "psInstallIconVariant";
       var DEFAULT_STATE = {
@@ -3865,6 +3865,13 @@
         });
       }
 
+      function formatDateTag(date) {
+        function pad(value) {
+          return String(value).padStart(2, "0");
+        }
+        return date.getFullYear() + "-" + pad(date.getMonth() + 1) + "-" + pad(date.getDate());
+      }
+
       function buildTextExport() {
         var stats = buildStats();
         var lines = [];
@@ -4001,7 +4008,7 @@
       }
 
       function downloadJsonBackup() {
-        downloadFile("pickle-score-backup.json", JSON.stringify(exportState(), null, 2), "application/json");
+        downloadFile("pickle-score-backup-" + formatDateTag(new Date()) + ".json", JSON.stringify(exportState(), null, 2), "application/json");
         showToast("JSON exported");
       }
 
