@@ -1,5 +1,22 @@
 const CHANGELOG = [
   {
+    version: "1.0.0.11",
+    date: "2026-07-16",
+    title: "Channel Pills",
+    summary: "Beta and alpha deploys are easier to identify at a glance.",
+    highlights: [
+      "Added beta and alpha pills beside the version."
+    ],
+    updateSections: [
+      {
+        heading: "Version",
+        items: [
+          "Beta and alpha deploy URLs now show a matching channel pill next to the version."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0.0.10",
     date: "2026-07-16",
     title: "Dated Backups",
