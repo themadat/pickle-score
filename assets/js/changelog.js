@@ -1,0 +1,306 @@
+const CHANGELOG = [
+  {
+    version: "1.0.0.10",
+    date: "2026-07-16",
+    title: "Dated Backups",
+    summary: "JSON backup exports are easier to identify after download.",
+    highlights: [
+      "Added the export date to JSON backup filenames."
+    ],
+    updateSections: [
+      {
+        heading: "Backups",
+        items: [
+          "JSON backups now download as pickle-score-backup-yyyy-mm-dd.json."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.0.0.9",
+    date: "2026-07-04",
+    title: "Bottom Bar",
+    summary: "Navigation and scoring controls are tuned for one-handed mobile use.",
+    highlights: [
+      "Moved the screen tabs to a fixed bottom bar.",
+      "Kept player search and Go above the bottom navigation.",
+      "Expanded score controls into larger two-row targets.",
+      "Kept the score screen fitted without scrolling."
+    ],
+    updateSections: [
+      {
+        heading: "Navigation",
+        items: [
+          "The Play, Rankings, Games, and Data tabs now sit at the bottom of the screen.",
+          "Bottom spacing keeps floating player controls clear of the tab bar."
+        ]
+      },
+      {
+        heading: "Scoring",
+        items: [
+          "The score entry controls now use larger plus, minus, loser-score, winner, and save targets.",
+          "The score screen reserves the available viewport for game entry without requiring page scroll."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.0.0.8",
+    date: "2026-07-04",
+    title: "Fast Picks",
+    summary: "Player selection is tuned for faster one-handed court use.",
+    highlights: [
+      "Cleared search after selecting or removing a player.",
+      "Floated the search/add bar and Go button near the keyboard.",
+      "Added swipe-left rename access on player rows.",
+      "Moved feedback messages away from the bottom controls."
+    ],
+    updateSections: [
+      {
+        heading: "Players",
+        items: [
+          "Selecting a player now clears the search field so the full list returns.",
+          "The search/add field and Go button float at the bottom of the Players screen."
+        ]
+      },
+      {
+        heading: "Editing",
+        items: [
+          "Swipe a player row from right to left to reveal the rename action.",
+          "Player edits continue to use stable player ids under the hood."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.0.0.7",
+    date: "2026-07-04",
+    title: "Thumb Reach",
+    summary: "Player selection, app title actions, and JSON backups are easier to reach from the court.",
+    highlights: [
+      "Changed the player list to one-line rows with games and record.",
+      "Moved search to a sticky bottom bar that can also add players.",
+      "Added top-bar JSON export and import buttons.",
+      "Let JSON imports merge with or overwrite current data."
+    ],
+    updateSections: [
+      {
+        heading: "Players",
+        items: [
+          "Player rows now show name, games played, and win-loss record on one line.",
+          "The search field stays at the bottom of the Players screen and adds its current text as a player."
+        ]
+      },
+      {
+        heading: "Backups",
+        items: [
+          "Added title-bar shortcuts for exporting and importing JSON backups.",
+          "File imports ask whether to merge into existing data or overwrite it."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.0.0.6",
+    date: "2026-07-04",
+    title: "Quick Switch",
+    summary: "The main screen toolbar is back for one-tap movement between app areas.",
+    highlights: [
+      "Restored the four-button screen toolbar below the top bar.",
+      "Kept Play active through Players, Matchups, Score, and Game Saved.",
+      "Added symbol-only shortcuts for Rankings, Games, and Data.",
+      "Kept the score screen compact with the toolbar visible."
+    ],
+    updateSections: [
+      {
+        heading: "Navigation",
+        items: [
+          "Added direct toolbar access to Play, Rankings, Games, and Data.",
+          "The Play tab stays selected throughout the active game-entry flow."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.0.0.5",
+    date: "2026-07-04",
+    title: "Next Rally",
+    summary: "Matchup cards and post-game flow are tuned for faster iPhone use.",
+    highlights: [
+      "Stacked matchup names into two team columns to keep names readable.",
+      "Compressed the score screen to fit an iPhone viewport without scrolling.",
+      "Added post-save choices for same teams or a different matchup.",
+      "Kept the four-player group ready after saving a game."
+    ],
+    updateSections: [
+      {
+        heading: "Matchups",
+        items: [
+          "Changed matchup cards so each team stacks its two players vertically.",
+          "Added length-based name fitting classes to avoid wrapping common long names."
+        ]
+      },
+      {
+        heading: "Scoring",
+        items: [
+          "Added compact score-screen styling when Score is active.",
+          "After saving, the app offers Same Teams, Different Matchup, or New Group actions."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.0.0.4",
+    date: "2026-07-04",
+    title: "Win Call",
+    summary: "Matchup choices are easier to read and games can be saved as win-only results.",
+    highlights: [
+      "Made matchup cards bigger with side-by-side partner names.",
+      "Added a Score or Win Only toggle on the scoring screen.",
+      "Saved scoreless wins with a winner and no point totals.",
+      "Kept rankings, history, text export, and CSV export aware of scoreless wins."
+    ],
+    updateSections: [
+      {
+        heading: "Matchups",
+        items: [
+          "Expanded matchup cards to use more of the screen with larger player-name tiles.",
+          "Placed doubles partners side by side inside each team choice."
+        ]
+      },
+      {
+        heading: "Scoring",
+        items: [
+          "Added Win Only mode for recording a winner without entering a score.",
+          "Scoreless wins count in records and ratings without adding point differential."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.0.0.3",
+    date: "2026-07-04",
+    title: "Court Flow",
+    summary: "The app now opens on player selection before matchup and score entry.",
+    highlights: [
+      "Reduced the top toolbar to the Settings button.",
+      "Made Players the opening screen with search-as-you-type filtering.",
+      "Sorted player selection by games played, then alphabetically.",
+      "Added the three possible doubles matchup choices before scoring."
+    ],
+    updateSections: [
+      {
+        heading: "Flow",
+        items: [
+          "Changed the default app path to Players, then Matchups, then Score.",
+          "The Go action requires exactly four selected players before showing pairings."
+        ]
+      },
+      {
+        heading: "Selection",
+        items: [
+          "Player chips now show game counts and selected state.",
+          "Four-player selections generate all three doubles pairings for quick score entry."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.0.0.2",
+    date: "2026-07-04",
+    title: "Symbol Serve",
+    summary: "Command buttons now use the shared Visit Tracker-style symbol set.",
+    highlights: [
+      "Added a focused Pickle Score icon constant file copied from Visit Tracker.",
+      "Changed app, tab, scoring, roster, data, and dialog commands to symbols.",
+      "Kept accessible labels and tooltips on symbol-only controls."
+    ],
+    updateSections: [
+      {
+        heading: "Symbols",
+        items: [
+          "Added assets/js/icons.js with the command symbols Pickle Score needs.",
+          "Loaded the symbol set before the main app script so render paths can share one icon map."
+        ]
+      },
+      {
+        heading: "Controls",
+        items: [
+          "Converted command buttons to icon-only controls while preserving aria labels and title text.",
+          "Kept player names, score values, and choice labels readable where text is the data itself."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.0.0.1",
+    date: "2026-07-04",
+    title: "Home Court",
+    summary: "Top-bar polish adds the app icon, install flow, settings, and version surfaces.",
+    highlights: [
+      "Added the Pickle Score icon to the top bar.",
+      "Added Add as App with light/dark icon selection and device directions.",
+      "Added a Settings dialog for theme, install, data, and app version.",
+      "Added visible version pills tied to APP_VERSION."
+    ],
+    updateSections: [
+      {
+        heading: "App Shell",
+        items: [
+          "Added dynamic install icon links before page load so chosen home-screen icons are used earlier.",
+          "Added top-bar Add as App and Settings buttons alongside the theme toggle."
+        ]
+      },
+      {
+        heading: "Install And Settings",
+        items: [
+          "Added a compact Add as App dialog with persisted light/dark icon choice and device-matched install instructions.",
+          "Added a Settings dialog with theme controls, Add as App access, Data tab handoff, and version metadata."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.0.0",
+    date: "2026-07-04",
+    title: "First Serve",
+    summary: "Pickle Score starts as a local-first scorekeeper for quick court-side game logging.",
+    banner: "Track games, rankings, pairs, and backups from one local scorekeeper.",
+    cta: "Serve It Up!",
+    highlights: [
+      "Record singles and doubles games with fast score controls.",
+      "Manage players, rankings, pair stats, and recent game history.",
+      "Export text, CSV, and JSON backups without a backend.",
+      "Install-ready icons, manifests, and release workflow are in place."
+    ],
+    updateSections: [
+      {
+        heading: "Scoring",
+        items: [
+          "Added singles/doubles draft modes, team slots, winner selection, loser-score shortcuts, and manual score adjustment.",
+          "Added clear, swap, rematch, undo-last, and per-game delete flows."
+        ]
+      },
+      {
+        heading: "Roster And Rankings",
+        items: [
+          "Added quick player entry, roster search, bulk import, hide/show management, and historical name snapshots.",
+          "Added lightweight player ratings, win/loss records, point differential, and best-pair summaries."
+        ]
+      },
+      {
+        heading: "Local Data",
+        items: [
+          "Stored all data in browser localStorage under pickle-score-state-v1.",
+          "Added text, CSV, JSON backup, restore, copy, download, and share flows."
+        ]
+      },
+      {
+        heading: "Project Setup",
+        items: [
+          "Added AI handoff docs, release notes, roadmap seeds, parse check, GitHub Pages deploy workflow, manifests, and icon build pipeline."
+        ]
+      }
+    ]
+  }
+];
